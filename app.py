@@ -17,21 +17,14 @@ st.set_page_config(
 # --- CSS Rút Gọn Để Vừa 1 Trang ---
 st.markdown("""
 <style>
-    /* Thu gọn khoảng cách các khối */
     .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
     h1 { font-size: 1.8rem !important; margin-bottom: 0 !important; padding-bottom: 0 !important; color: #065f46; }
     h3 { font-size: 1.2rem !important; margin-top: 0 !important; color: #0f766e; }
     p { margin-bottom: 0.5rem !important; font-size: 0.95rem !important; }
-    
-    /* Thiết kế form card hiển thị thông tin gọn gàng */
     .info-card { background-color: #f8fafc; border-left: 4px solid #10b981; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.4; }
     .warning-card { border-left-color: #f59e0b; background-color: #fffbeb; }
     .danger-card { border-left-color: #ef4444; background-color: #fef2f2; }
-    
-    /* Khống chế chiều cao hình ảnh để không bị chiếm chỗ */
     img { max-height: 380px !important; object-fit: contain !important; border-radius: 8px; }
-    
-    /* Căn chỉnh text cột số liệu */
     .metric-value { font-size: 2.5rem; font-weight: 800; color: #be123c; line-height: 1.1; }
     .metric-label { font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
 </style>
@@ -99,7 +92,7 @@ if uploaded_file is not None:
     tab1, tab2 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Tính Cấp Bệnh (Tỷ Lệ)"])
     
     # ---------------------------------------------------------
-    # TAB 1: BỐ CỤC 3 CỘT (Ảnh gốc | Ảnh AI | Kết quả rút gọn)
+    # TAB 1: CHẨN ĐOÁN BỆNH
     # ---------------------------------------------------------
     with tab1:
         if st.button("🚀 Chạy Phân Loại (Classification)", type="primary", use_container_width=True):
@@ -111,14 +104,13 @@ if uploaded_file is not None:
                     if len(res.boxes) > 0:
                         c1, c2, c3 = st.columns([1, 1, 1.5])
                         
-                        # Cột 1 & 2: Hiển thị hình ảnh
                         with c1:
                             st.image(image_pil, caption="Ảnh gốc đầu vào", use_column_width=True)
                         with c2:
-                            res_plotted = res.plot()
+                            # Tắt Box và Tắt cả Text Label
+                            res_plotted = res.plot(boxes=False, labels=False)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="AI Nhận diện", use_column_width=True)
                             
-                        # Cột 3: Thông tin nội dung (vừa vặn trên 1 trang)
                         with c3:
                             class_id = int(res.boxes.cls[0].item())
                             conf = float(res.boxes.conf[0].item()) * 100
@@ -150,7 +142,7 @@ if uploaded_file is not None:
                         st.warning("Mô hình không nhận diện được dấu hiệu với độ tin cậy > 80%.")
 
     # ---------------------------------------------------------
-    # TAB 2: BỐ CỤC 3 CỘT VÀ THUẬT TOÁN AUTO-SORT FOOLPROOF
+    # TAB 2: THUẬT TOÁN GỘP MASK (UNION) TRIỆT ĐỂ 100%
     # ---------------------------------------------------------
     with tab2:
         if st.button("🚀 Tính Tỷ Lệ & Cấp Bệnh (Segmentation)", type="primary", use_container_width=True):
@@ -162,43 +154,40 @@ if uploaded_file is not None:
                     if len(res.boxes) > 0 and res.masks is not None:
                         c1, c2, c3 = st.columns([1, 1, 1.2])
                         
-                        # Cột 1 & 2: Hình ảnh
                         with c1:
                             st.image(image_pil, caption="Ảnh gốc", use_column_width=True)
                         with c2:
-                            res_plotted = res.plot()
+                            # Tắt Box và Tắt cả Text Label
+                            res_plotted = res.plot(boxes=False, labels=False)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Segmentation", use_column_width=True)
                             
-                        # Cột 3: Tính toán và Hiển thị
                         with c3:
                             masks = res.masks.data.cpu().numpy()  
                             classes = res.boxes.cls.cpu().numpy() 
                             
-                            area_class_0 = 0
-                            area_class_1 = 0
+                            # Tạo mask rỗng để chuẩn bị gộp
+                            total_leaf_mask = np.zeros(masks[0].shape, dtype=bool)
+                            disease_mask = np.zeros(masks[0].shape, dtype=bool)
                             
                             for i, cls_id in enumerate(classes):
-                                if int(cls_id) == 0:
-                                    area_class_0 += np.sum(masks[i] > 0.5)
-                                elif int(cls_id) == 1:
-                                    area_class_1 += np.sum(masks[i] > 0.5)
+                                mask_binary = masks[i] > 0.5
+                                
+                                # 1. Gộp TẤT CẢ các mask trên ảnh lại để thành Toàn Bộ Chiếc Lá
+                                total_leaf_mask = np.logical_or(total_leaf_mask, mask_binary)
+                                
+                                # 2. Chỉ lọc mask nào có tên là Vết bệnh để cộng dồn vào Vết bệnh
+                                name_lower = res.names[int(cls_id)].lower()
+                                if "vet" in name_lower:
+                                    disease_mask = np.logical_or(disease_mask, mask_binary)
                             
-                            # --- THUẬT TOÁN TỰ ĐỘNG CÂN BẰNG (Chống lỗi ngược ID) ---
-                            # Vì vết bệnh luôn nằm trong/nhỏ hơn diện tích toàn bộ lá:
-                            # Giá trị lớn hơn CHẮC CHẮN là Toàn Bộ Lá. Giá trị nhỏ hơn là Vết Bệnh.
-                            if area_class_0 > 0 and area_class_1 > 0:
-                                leaf_pixels = max(area_class_0, area_class_1)
-                                disease_pixels = min(area_class_0, area_class_1)
-                            elif area_class_0 > 0 or area_class_1 > 0:
-                                leaf_pixels = max(area_class_0, area_class_1)
-                                disease_pixels = 0  # Chỉ phát hiện được lá (Khỏe mạnh)
-                            else:
-                                leaf_pixels, disease_pixels = 0, 0
+                            # Đếm tổng pixel từ ma trận đã gộp
+                            leaf_pixels = int(np.sum(total_leaf_mask))
+                            disease_pixels = int(np.sum(disease_mask))
                                 
                             st.markdown("### Kết Quả Đo Lường")
                             st.markdown("<div style='margin-bottom: 10px;'>", unsafe_allow_html=True)
-                            st.caption(f"📏 Tổng Pixel Lá: {leaf_pixels:,}")
-                            st.caption(f"📏 Tổng Pixel Bệnh: {disease_pixels:,}")
+                            st.caption(f"📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}")
+                            st.caption(f"📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}")
                             st.markdown("</div>", unsafe_allow_html=True)
                             
                             if leaf_pixels > 0:
