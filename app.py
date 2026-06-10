@@ -123,9 +123,9 @@ tab1, tab2, tab3 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Tính Cấp Bện
 # ---------------------------------------------------------
 with tab1:
     if image_cv is not None:
-        if st.button("🚀 Chạy Phân Loại (Classification)", type="primary", use_container_width=True, key="btn_class"):
+        if st.button("🚀 Chẩn đoán", type="primary", use_container_width=True, key="btn_class"):
             if model_chuandoan is not None:
-                with st.spinner("Đang phân loại..."):
+                with st.spinner("Đang chẩn đoán..."):
                     results = model_chuandoan.predict(image_cv, conf=0.8)
                     res = results[0]
                     
@@ -142,7 +142,7 @@ with tab1:
                             conf = float(res.boxes.conf[0].item()) * 100
                             pred_name = res.names[class_id].lower()
                             
-                            # Ánh xạ theo model (Chỉ lấy Đốm đen hoặc Cháy lá sinh lý)
+                            # Ánh xạ theo model
                             info_key = "Khoe"
                             if "dom" in pred_name: info_key = "Dom_den"
                             elif "chay" in pred_name: info_key = "Chay_la_sinh_ly"
@@ -175,7 +175,7 @@ with tab1:
 # ---------------------------------------------------------
 with tab2:
     if image_cv is not None:
-        if st.button("🚀 Tính Tỷ Lệ & Cấp Bệnh (Segmentation)", type="primary", use_container_width=True, key="btn_seg"):
+        if st.button("🚀 Tính Mức độ bị hại & Cấp bệnh", type="primary", use_container_width=True, key="btn_seg"):
             if model_capbenh is not None:
                 with st.spinner("AI đang nội suy mask..."):
                     results = model_capbenh.predict(image_cv, conf=0.8)
@@ -220,7 +220,7 @@ with tab2:
                                 
                             st.markdown(f"""
                             <div>
-                                <div class='metric-label'>Tỷ lệ diện tích tổn thương</div>
+                                <div class='metric-label'>Lá bị hại</div>
                                 <div class='metric-value'>{infected_percentage}%</div>
                             </div>
                             """, unsafe_allow_html=True)
