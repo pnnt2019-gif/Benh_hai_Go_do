@@ -3,6 +3,7 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 from PIL import Image
+import os
 
 # ==========================================
 # 1. CẤU HÌNH GIAO DIỆN TRANG WEB
@@ -46,26 +47,48 @@ def load_models():
 model_chuandoan, model_capbenh = load_models()
 
 # ==========================================
-# 3. DỮ LIỆU BỆNH
+# 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI
 # ==========================================
 DISEASE_INFO = {
     "Dom_den": {
-        "name": "Bệnh đốm đen",
+        "name": "Bệnh Đốm Đen",
         "scientific": "Stemphylium sp.",
         "order": "Pleosporales",
         "family": "Pleosporaceae",
-        "symptoms": "Vết bệnh cục bộ trên lá, kích thước đa dạng, hình tròn/bầu dục, mang màu đen đặc trưng.",
-        "cause": "Nấm Stemphylium sp. tấn công biểu bì lá.",
-        "prevention": "Vệ sinh khu vực ươm; tạo thông thoáng; dùng thuốc gốc Đồng hoặc Mancozeb."
+        "cause": "Do nấm Stemphylium sp. tấn công biểu bì lá.",
+        "symptoms": "Vết bệnh cục bộ trên lá, kích thước đa dạng, hình tròn/bầu dục hoặc bất định hình, mang màu đen đặc trưng.",
+        "prevention": "- Vệ sinh khu vực ươm; tạo thông thoáng.\n- Thu gom tiêu hủy lá bệnh.\n- Dùng thuốc gốc Đồng hoặc Mancozeb.",
+        "image": "dom_den.jpg"
     },
-    "Chay_la": {
-        "name": "Cháy lá sinh lý",
+    "Chay_la_sinh_ly": {
+        "name": "Cháy Lá Sinh Lý",
         "scientific": "Abiotic stress",
         "order": "Không",
         "family": "Không",
-        "symptoms": "Mô lá khô lại, teo tóp, giòn, màu nâu/xám. Bề mặt nhẵn, KHÔNG có bào tử nấm.",
         "cause": "Yếu tố phi sinh học: sốc nhiệt, gió, muối, ô nhiễm hoặc mất cân bằng dinh dưỡng.",
-        "prevention": "Điều chỉnh nước tưới; che lưới cắt nắng; tránh bón thừa đạm (phân hóa học)."
+        "symptoms": "Mô lá khô lại, teo tóp, giòn, màu nâu/xám. Bề mặt nhẵn, KHÔNG có dấu hiệu bào tử nấm.",
+        "prevention": "- Điều chỉnh lượng nước tưới phù hợp.\n- Che lưới cắt nắng.\n- Tránh bón thừa đạm (phân hóa học).",
+        "image": "chay_la_sinh_ly.jpg"
+    },
+    "Chay_la": {
+        "name": "Bệnh Cháy Lá",
+        "scientific": "Xylella fastidiosa",
+        "order": "Lysobacterales",
+        "family": "Xanthomonadaceae",
+        "cause": "Do vi khuẩn Xylella fastidiosa xâm nhập và làm tắc nghẽn mạch dẫn nước của cây.",
+        "symptoms": "Hiện tượng cháy mép lá, thường đi kèm với một dải màu vàng hoặc đỏ rực phân tách rõ rệt giữa phần mô lá còn khỏe mạnh và phần mô đã bị hoại tử.",
+        "prevention": "- Cắt tỉa và tiêu hủy ngay cành/lá có triệu chứng.\n- Sát trùng dụng cụ cắt tỉa bằng cồn hoặc Javel.\n- Quản lý tốt nguồn nước tưới, tránh ngập úng.\n- Sử dụng thuốc gốc Đồng (Copper) để sát khuẩn.",
+        "image": "chay_la.jpg"
+    },
+    "Dom_nau": {
+        "name": "Bệnh Đốm Nâu",
+        "scientific": "Curvularia sp.",
+        "order": "Pleosporales",
+        "family": "Pleosporaceae",
+        "cause": "Do nấm Curvularia sp. gây ra.",
+        "symptoms": "Vết tổn thương cục bộ ở hai mặt lá, hình tròn/bầu dục hoặc bất định. Vùng mô bệnh màu nâu sẫm, rìa ngoài bao quanh bởi quầng sáng màu vàng nhạt phân định rõ ràng.",
+        "prevention": "- Vệ sinh vườn ươm, dọn sạch tàn dư thực vật.\n- Đảm bảo mật độ gieo ươm thoáng đãng.\n- Tăng cường bón Lân và Kali.\n- Phun thuốc Mancozeb, Difenoconazole hoặc Azoxystrobin.",
+        "image": "dom_nau.jpg"
     },
     "Khoe": {
         "name": "Lá Khỏe Mạnh",
@@ -76,26 +99,31 @@ DISEASE_INFO = {
 # ==========================================
 # 4. GIAO DIỆN CHÍNH
 # ==========================================
-st.markdown("<h1>🌿 Ứng Dụng Chẩn Đoán Bệnh Cây Gõ Đỏ</h1>", unsafe_allow_html=True)
+st.markdown("<h1>🌿 Hệ Thống Chẩn Đoán & Tra Cứu Bệnh Gõ Đỏ</h1>", unsafe_allow_html=True)
 
 with st.sidebar:
     st.markdown("### 📸 Hình ảnh đầu vào")
     uploaded_file = st.file_uploader("Chọn ảnh lá cây", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     st.caption("Khuyến nghị: Chụp rõ bề mặt lá, đủ sáng.")
     st.divider()
-    st.markdown("**Thông tin mô hình:**\n- `YOLOv8-seg (1)`: Phân loại\n- `YOLOv8-seg (2)`: Tính tỷ lệ")
+    st.markdown("**Chức năng hệ thống:**\n1. `Chẩn đoán` (Classification)\n2. `Tính Tỷ lệ` (Segmentation)\n3. `Tra cứu` (Từ điển bệnh học)")
 
 if uploaded_file is not None:
     image_pil = Image.open(uploaded_file)
     image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
-    
-    tab1, tab2 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Tính Cấp Bệnh (Tỷ Lệ)"])
-    
-    # ---------------------------------------------------------
-    # TAB 1: CHẨN ĐOÁN BỆNH
-    # ---------------------------------------------------------
-    with tab1:
-        if st.button("🚀 Chạy Phân Loại (Classification)", type="primary", use_container_width=True):
+else:
+    image_pil = None
+    image_cv = None
+
+# Tích hợp 3 chức năng thành 3 Tab cố định
+tab1, tab2, tab3 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Tính Cấp Bệnh", "📖 Từ Điển Tra Cứu"])
+
+# ---------------------------------------------------------
+# TAB 1: CHẨN ĐOÁN BỆNH
+# ---------------------------------------------------------
+with tab1:
+    if image_cv is not None:
+        if st.button("🚀 Chạy Phân Loại (Classification)", type="primary", use_container_width=True, key="btn_class"):
             if model_chuandoan is not None:
                 with st.spinner("Đang phân loại..."):
                     results = model_chuandoan.predict(image_cv, conf=0.8)
@@ -103,11 +131,9 @@ if uploaded_file is not None:
                     
                     if len(res.boxes) > 0:
                         c1, c2, c3 = st.columns([1, 1, 1.5])
-                        
                         with c1:
                             st.image(image_pil, caption="Ảnh gốc đầu vào", use_column_width=True)
                         with c2:
-                            # Tắt Box và Tắt cả Text Label
                             res_plotted = res.plot(boxes=False, labels=False)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="AI Nhận diện", use_column_width=True)
                             
@@ -116,9 +142,10 @@ if uploaded_file is not None:
                             conf = float(res.boxes.conf[0].item()) * 100
                             pred_name = res.names[class_id].lower()
                             
+                            # Ánh xạ theo model (Chỉ lấy Đốm đen hoặc Cháy lá sinh lý)
                             info_key = "Khoe"
                             if "dom" in pred_name: info_key = "Dom_den"
-                            elif "chay" in pred_name: info_key = "Chay_la"
+                            elif "chay" in pred_name: info_key = "Chay_la_sinh_ly"
                             
                             info = DISEASE_INFO[info_key]
                             
@@ -136,16 +163,19 @@ if uploaded_file is not None:
                                 st.markdown(f"""
                                 <div class="info-card danger-card"><b>🔴 Triệu chứng:</b> {info['symptoms']}</div>
                                 <div class="info-card warning-card"><b>🔬 Nguyên nhân:</b> {info['cause']}</div>
-                                <div class="info-card"><b>🛡️ Phòng trừ:</b> {info['prevention']}</div>
+                                <div class="info-card"><b>🛡️ Phòng trừ:</b><br>{info['prevention'].replace(chr(10), '<br>')}</div>
                                 """, unsafe_allow_html=True)
                     else:
                         st.warning("Mô hình không nhận diện được dấu hiệu với độ tin cậy > 80%.")
+    else:
+        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
 
-    # ---------------------------------------------------------
-    # TAB 2: THUẬT TOÁN GỘP MASK (UNION) TRIỆT ĐỂ 100%
-    # ---------------------------------------------------------
-    with tab2:
-        if st.button("🚀 Tính Tỷ Lệ & Cấp Bệnh (Segmentation)", type="primary", use_container_width=True):
+# ---------------------------------------------------------
+# TAB 2: TÍNH TỶ LỆ (SEGMENTATION)
+# ---------------------------------------------------------
+with tab2:
+    if image_cv is not None:
+        if st.button("🚀 Tính Tỷ Lệ & Cấp Bệnh (Segmentation)", type="primary", use_container_width=True, key="btn_seg"):
             if model_capbenh is not None:
                 with st.spinner("AI đang nội suy mask..."):
                     results = model_capbenh.predict(image_cv, conf=0.8)
@@ -153,11 +183,9 @@ if uploaded_file is not None:
                     
                     if len(res.boxes) > 0 and res.masks is not None:
                         c1, c2, c3 = st.columns([1, 1, 1.2])
-                        
                         with c1:
                             st.image(image_pil, caption="Ảnh gốc", use_column_width=True)
                         with c2:
-                            # Tắt Box và Tắt cả Text Label
                             res_plotted = res.plot(boxes=False, labels=False)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Segmentation", use_column_width=True)
                             
@@ -165,22 +193,16 @@ if uploaded_file is not None:
                             masks = res.masks.data.cpu().numpy()  
                             classes = res.boxes.cls.cpu().numpy() 
                             
-                            # Tạo mask rỗng để chuẩn bị gộp
                             total_leaf_mask = np.zeros(masks[0].shape, dtype=bool)
                             disease_mask = np.zeros(masks[0].shape, dtype=bool)
                             
                             for i, cls_id in enumerate(classes):
                                 mask_binary = masks[i] > 0.5
-                                
-                                # 1. Gộp TẤT CẢ các mask trên ảnh lại để thành Toàn Bộ Chiếc Lá
                                 total_leaf_mask = np.logical_or(total_leaf_mask, mask_binary)
-                                
-                                # 2. Chỉ lọc mask nào có tên là Vết bệnh để cộng dồn vào Vết bệnh
                                 name_lower = res.names[int(cls_id)].lower()
                                 if "vet" in name_lower:
                                     disease_mask = np.logical_or(disease_mask, mask_binary)
                             
-                            # Đếm tổng pixel từ ma trận đã gộp
                             leaf_pixels = int(np.sum(total_leaf_mask))
                             disease_pixels = int(np.sum(disease_mask))
                                 
@@ -203,10 +225,7 @@ if uploaded_file is not None:
                             </div>
                             """, unsafe_allow_html=True)
                             
-                            # Phân loại cấp bệnh
-                            level = 0
-                            muc_do = "Khỏe mạnh"
-                            
+                            level, muc_do = 0, "Khỏe mạnh"
                             if infected_percentage > 0:
                                 if infected_percentage < 25: level, muc_do = 1, "Hại nhẹ"
                                 elif infected_percentage < 50: level, muc_do = 2, "Hại vừa"
@@ -214,16 +233,54 @@ if uploaded_file is not None:
                                 else: level, muc_do = 4, "Hại rất nặng"
                             
                             st.progress(int(min(infected_percentage, 100)))
-                            
                             if level > 0:
                                 st.error(f"⚠️ **Kết luận: BỆNH CẤP {level} ({muc_do})**")
                             else:
                                 st.success("✅ **Kết luận: Không phát hiện vết bệnh (Cấp 0)**")
                     else:
                         st.warning("Chưa trích xuất được Mask tổn thương.")
-else:
-    st.markdown("""
-    <div style="text-align: center; padding: 50px; background-color: #f8fafc; border-radius: 10px; border: 2px dashed #cbd5e1;">
-        <h3 style="color: #64748b;">Vui lòng chọn ảnh đầu vào tại thanh menu bên trái</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    else:
+        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để Đo lường cấp bệnh.")
+
+# ---------------------------------------------------------
+# TAB 3: TỪ ĐIỂN TRA CỨU
+# ---------------------------------------------------------
+with tab3:
+    st.markdown("### 📖 Hệ Thống Cơ Sở Dữ Liệu Bệnh Hại")
+    
+    # Tạo menu thả xuống để chọn bệnh
+    disease_options = {
+        "Bệnh Đốm Đen": "Dom_den",
+        "Cháy Lá Sinh Lý": "Chay_la_sinh_ly",
+        "Bệnh Cháy Lá (Vi khuẩn)": "Chay_la",
+        "Bệnh Đốm Nâu": "Dom_nau"
+    }
+    
+    selected_disease_name = st.selectbox("Chọn loại bệnh để tra cứu chi tiết:", list(disease_options.keys()))
+    selected_key = disease_options[selected_disease_name]
+    dict_info = DISEASE_INFO[selected_key]
+    
+    col_dict1, col_dict2 = st.columns([1, 1.2])
+    
+    with col_dict1:
+        # Kiểm tra và tải ảnh từ local folder GitHub
+        if os.path.exists(dict_info['image']):
+            st.image(dict_info['image'], caption=f"Hình ảnh thực tế: {dict_info['name']}", use_column_width=True)
+        else:
+            st.info(f"⚠️ Chưa tìm thấy file ảnh `{dict_info['image']}` trên hệ thống.")
+            
+    with col_dict2:
+        st.markdown(f"## {dict_info['name']}")
+        
+        if dict_info['order'] != "Không":
+            st.markdown(f"**Tên khoa học:** <i>{dict_info['scientific']}</i>", unsafe_allow_html=True)
+            st.markdown(f"**Bộ:** {dict_info['order']} | **Họ:** {dict_info['family']}")
+        else:
+            st.markdown(f"**Tên khoa học:** <i>{dict_info['scientific']}</i> (Yếu tố phi sinh học)", unsafe_allow_html=True)
+            
+        st.markdown("---")
+        st.markdown(f"""
+        <div class="info-card warning-card"><b>🔬 Nguyên nhân:</b> {dict_info['cause']}</div>
+        <div class="info-card danger-card"><b>🔴 Triệu chứng:</b> {dict_info['symptoms']}</div>
+        <div class="info-card"><b>🛡️ Biện pháp phòng trừ:</b><br>{dict_info['prevention'].replace(chr(10), '<br>')}</div>
+        """, unsafe_allow_html=True)
