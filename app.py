@@ -106,7 +106,7 @@ with st.sidebar:
     uploaded_file = st.file_uploader("Chọn ảnh lá cây", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     st.caption("Khuyến nghị: Chụp rõ bề mặt lá, đủ sáng.")
     st.divider()
-    st.markdown("**Chức năng hệ thống:**\n1. `Chẩn đoán` (Classification)\n2. `Tính Tỷ lệ` (Segmentation)\n3. `Tra cứu` (Từ điển bệnh học)")
+    st.markdown("**Chức năng hệ thống:**\n1. Chẩn đoán\n2. Tính Mức độ bị hại & Cấp bệnh\n3. Tra cứu")
 
 if uploaded_file is not None:
     image_pil = Image.open(uploaded_file)
