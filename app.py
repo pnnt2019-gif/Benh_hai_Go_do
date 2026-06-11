@@ -55,7 +55,7 @@ DISEASE_INFO = {
         "scientific": "Stemphylium sp.",
         "order": "Pleosporales",
         "family": "Pleosporaceae",
-        "cause": "Do nấm Stemphylium sp. tấn công biểu bì lá.",
+        "cause": "Do nấm <i>Stemphylium</i> sp. tấn công biểu bì lá.",
         "symptoms": "Vết bệnh cục bộ trên lá, kích thước đa dạng, hình tròn/bầu dục hoặc bất định hình, mang màu đen đặc trưng.",
         "prevention": "- Sử dụng chế phẩm chứa nấm đối kháng Trichoderma harzianum (2,5 - 3 g/lít nước).\n- Phun ướt đều tán lá định kỳ để ức chế sự nảy mầm và phát triển của bào tử nấm.",
         "image": "dom_den.jpg"
@@ -75,7 +75,7 @@ DISEASE_INFO = {
         "scientific": "Xylella fastidiosa",
         "order": "Lysobacterales",
         "family": "Xanthomonadaceae",
-        "cause": "Do vi khuẩn Xylella fastidiosa xâm nhập và làm tắc nghẽn mạch dẫn nước của cây.",
+        "cause": "Do vi khuẩn <i>Xylella fastidiosa</i> xâm nhập và làm tắc nghẽn mạch dẫn nước của cây.",
         "symptoms": "Hiện tượng cháy mép lá, thường đi kèm với một dải màu vàng hoặc đỏ rực phân tách rõ rệt giữa phần mô lá còn khỏe mạnh và phần mô đã bị hoại tử.",
         "prevention": "- Phun định kỳ thuốc sát khuẩn gốc Đồng (như Copper Oxychloride, 3 - 5 g/lít nước) hoặc dung dịch phức hợp Đồng - Kẽm.\n- Khi bệnh mới chớm, luân phiên sử dụng thuốc sát khuẩn nội hấp Kasugamycin (1,5 - 2 ml/lít nước) để kìm hãm vi khuẩn nhân lên.",
         "image": "chay_la.jpg"
@@ -85,7 +85,7 @@ DISEASE_INFO = {
         "scientific": "Curvularia sp.",
         "order": "Pleosporales",
         "family": "Pleosporaceae",
-        "cause": "Do nấm Curvularia sp. gây ra.",
+        "cause": "Do nấm <i>Curvularia</i> sp. gây ra.",
         "symptoms": "Vết tổn thương cục bộ ở hai mặt lá, hình tròn/bầu dục hoặc bất định. Vùng mô bệnh màu nâu sẫm, rìa ngoài bao quanh bởi quầng sáng màu vàng nhạt phân định rõ ràng.",
         "prevention": "- Ưu tiên chế phẩm sinh học chứa Bacillus subtilis / Trichoderma viride (2 - 3 g/lít nước) hoặc thuốc hóa học chứa Propiconazole (1 ml/lít nước).\n- Phun ướt đều hai mặt lá để ngăn chặn sự xâm nhiễm và kìm hãm nảy mầm bào tử.",
         "image": "dom_nau.jpg"
