@@ -57,7 +57,7 @@ DISEASE_INFO = {
         "family": "Pleosporaceae",
         "cause": "Do nấm Stemphylium sp. tấn công biểu bì lá.",
         "symptoms": "Vết bệnh cục bộ trên lá, kích thước đa dạng, hình tròn/bầu dục hoặc bất định hình, mang màu đen đặc trưng.",
-        "prevention": "- Vệ sinh khu vực ươm; tạo thông thoáng.\n- Thu gom tiêu hủy lá bệnh.\n- Dùng thuốc gốc Đồng hoặc Mancozeb.",
+        "prevention": "- Sử dụng chế phẩm chứa nấm đối kháng Trichoderma harzianum (2,5 - 3 g/lít nước).\n- Phun ướt đều tán lá định kỳ để ức chế sự nảy mầm và phát triển của bào tử nấm.",
         "image": "dom_den.jpg"
     },
     "Chay_la_sinh_ly": {
@@ -67,7 +67,7 @@ DISEASE_INFO = {
         "family": "Không",
         "cause": "Yếu tố phi sinh học: sốc nhiệt, gió, muối, ô nhiễm hoặc mất cân bằng dinh dưỡng.",
         "symptoms": "Mô lá khô lại, teo tóp, giòn, màu nâu/xám. Bề mặt nhẵn, KHÔNG có dấu hiệu bào tử nấm.",
-        "prevention": "- Điều chỉnh lượng nước tưới phù hợp.\n- Che lưới cắt nắng.\n- Tránh bón thừa đạm (phân hóa học).",
+        "prevention": "- KHÔNG sử dụng thuốc BVTV. Trọng tâm là điều chỉnh vi khí hậu vườn ươm.\n- Trang bị lưới che giảm 50 - 70% ánh sáng, điều chỉnh chế độ tưới tránh gây sốc nước.\n- Phun bổ sung phân bón lá hữu cơ (Amino Acid nồng độ loãng) để giải tỏa stress và kích thích cây phục hồi.",
         "image": "chay_la_sinh_ly.jpg"
     },
     "Chay_la": {
@@ -77,7 +77,7 @@ DISEASE_INFO = {
         "family": "Xanthomonadaceae",
         "cause": "Do vi khuẩn Xylella fastidiosa xâm nhập và làm tắc nghẽn mạch dẫn nước của cây.",
         "symptoms": "Hiện tượng cháy mép lá, thường đi kèm với một dải màu vàng hoặc đỏ rực phân tách rõ rệt giữa phần mô lá còn khỏe mạnh và phần mô đã bị hoại tử.",
-        "prevention": "- Cắt tỉa và tiêu hủy ngay cành/lá có triệu chứng.\n- Sát trùng dụng cụ cắt tỉa bằng cồn hoặc Javel.\n- Quản lý tốt nguồn nước tưới, tránh ngập úng.\n- Sử dụng thuốc gốc Đồng (Copper) để sát khuẩn.",
+        "prevention": "- Phun định kỳ thuốc sát khuẩn gốc Đồng (như Copper Oxychloride, 3 - 5 g/lít nước) hoặc dung dịch phức hợp Đồng - Kẽm.\n- Khi bệnh mới chớm, luân phiên sử dụng thuốc sát khuẩn nội hấp Kasugamycin (1,5 - 2 ml/lít nước) để kìm hãm vi khuẩn nhân lên.",
         "image": "chay_la.jpg"
     },
     "Dom_nau": {
@@ -87,7 +87,7 @@ DISEASE_INFO = {
         "family": "Pleosporaceae",
         "cause": "Do nấm Curvularia sp. gây ra.",
         "symptoms": "Vết tổn thương cục bộ ở hai mặt lá, hình tròn/bầu dục hoặc bất định. Vùng mô bệnh màu nâu sẫm, rìa ngoài bao quanh bởi quầng sáng màu vàng nhạt phân định rõ ràng.",
-        "prevention": "- Vệ sinh vườn ươm, dọn sạch tàn dư thực vật.\n- Đảm bảo mật độ gieo ươm thoáng đãng.\n- Tăng cường bón Lân và Kali.\n- Phun thuốc Mancozeb, Difenoconazole hoặc Azoxystrobin.",
+        "prevention": "- Ưu tiên chế phẩm sinh học chứa Bacillus subtilis / Trichoderma viride (2 - 3 g/lít nước) hoặc thuốc hóa học chứa Propiconazole (1 ml/lít nước).\n- Phun ướt đều hai mặt lá để ngăn chặn sự xâm nhiễm và kìm hãm nảy mầm bào tử.",
         "image": "dom_nau.jpg"
     },
     "Khoe": {
