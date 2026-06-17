@@ -4,4 +4,3 @@ torch
 torchvision
 Pillow
 numpy<2.0.0
-opencv-python-headless
