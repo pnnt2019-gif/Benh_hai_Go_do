@@ -1,27 +1,31 @@
-# ==========================================
-# 0. TỰ ĐỘNG SỬA LỖI MÔI TRƯỜNG OPENCV
-# ==========================================
+import os
 import sys
 import subprocess
 
-try:
-    import cv2
-except ImportError:
-    # Nếu hệ thống tải nhầm bản OpenCV lỗi, tự động gỡ và cài bản Headless
-    subprocess.call([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python", "opencv-python-headless"])
-    subprocess.call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
-    if 'cv2' in sys.modules:
-        del sys.modules['cv2']
-    import cv2
+# ==========================================
+# 0. CHUẨN BỊ MÔI TRƯỜNG (CHẠY 1 LẦN DUY NHẤT)
+# ==========================================
+# Gỡ bản lỗi, cài bản Headless siêu nhẹ và tự động Reset RAM
+if not os.path.exists("fixed_cv2.txt"):
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python", "opencv-python-headless"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
+        # Đánh dấu đã sửa lỗi xong
+        with open("fixed_cv2.txt", "w") as f:
+            f.write("done")
+        # Ép máy chủ khởi động lại tiến trình Python để xóa cache RAM cũ
+        os._exit(0)
+    except Exception:
+        pass
 
 # ==========================================
-# 1. CÁC THƯ VIỆN CHÍNH & CẤU HÌNH GIAO DIỆN
+# 1. CẤU HÌNH GIAO DIỆN TRANG WEB
 # ==========================================
 import streamlit as st
 from ultralytics import YOLO
+import cv2
 import numpy as np
 from PIL import Image
-import os
 
 st.set_page_config(
     page_title="Chẩn Đoán Bệnh Gõ Đỏ",
