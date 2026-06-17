@@ -1,22 +1,12 @@
 import os
 import sys
-import subprocess
 
 # ==========================================
-# 0. CHUẨN BỊ MÔI TRƯỜNG (CHẠY 1 LẦN DUY NHẤT)
+# 0. VẮC-XIN ĐẶC TRỊ LỖI OPENCV TRÊN STREAMLIT
 # ==========================================
-# Gỡ bản lỗi, cài bản Headless siêu nhẹ và tự động Reset RAM
-if not os.path.exists("fixed_cv2.txt"):
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python", "opencv-python-headless"])
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
-        # Đánh dấu đã sửa lỗi xong
-        with open("fixed_cv2.txt", "w") as f:
-            f.write("done")
-        # Ép máy chủ khởi động lại tiến trình Python để xóa cache RAM cũ
-        os._exit(0)
-    except Exception:
-        pass
+# Ép hệ thống gỡ bỏ bản OpenCV bị lỗi và tải bản xịn trước khi chạy mô hình
+os.system(f"{sys.executable} -m pip uninstall -y opencv-python")
+os.system(f"{sys.executable} -m pip install opencv-python-headless")
 
 # ==========================================
 # 1. CẤU HÌNH GIAO DIỆN TRANG WEB
