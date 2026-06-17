@@ -1,13 +1,20 @@
+import os
+import sys
+
+# ==========================================
+# 0. LỆNH CƯỠNG CHẾ XÓA LỖI (PHẢI NẰM TRÊN CÙNG)
+# ==========================================
+os.system(f"{sys.executable} -m pip uninstall -y opencv-python")
+
+# ==========================================
+# 1. CẤU HÌNH GIAO DIỆN TRANG WEB
+# ==========================================
 import streamlit as st
 from ultralytics import YOLO
 import cv2
 import numpy as np
 from PIL import Image
-import os
 
-# ==========================================
-# 1. CẤU HÌNH GIAO DIỆN TRANG WEB
-# ==========================================
 st.set_page_config(
     page_title="Chẩn Đoán Bệnh Gõ Đỏ",
     page_icon="🌿",
@@ -246,7 +253,7 @@ with tab2:
 # TAB 3: TỪ ĐIỂN TRA CỨU
 # ---------------------------------------------------------
 with tab3:
-    st.markdown("### 📖 Hệ Thống Cơ Sở Dữ Luệu Bệnh Hại")
+    st.markdown("### 📖 Hệ Thống Cơ Sở Dữ Liệu Bệnh Hại")
     
     # Tạo menu thả xuống để chọn bệnh
     disease_options = {
