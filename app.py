@@ -3,14 +3,12 @@ import pathlib
 import streamlit as st
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 from ultralytics import YOLO
 
 # ==========================================
 # 0. HACK FIX: LỖI TƯƠNG THÍCH WINDOWS -> LINUX CHO PYTORCH
 # ==========================================
-# Dòng này giúp 'dịch' cấu trúc đường dẫn từ môi trường Windows (khi train model) 
-# sang chuẩn Linux trên Streamlit Cloud, tránh lỗi crash hệ thống.
 if os.name != 'nt':
     pathlib.WindowsPath = pathlib.PosixPath
 
@@ -24,7 +22,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- CSS Tối Ưu Giao Diện Web ---
 st.markdown("""
 <style>
     .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
@@ -58,7 +55,6 @@ model_chuandoan, model_capbenh = load_models()
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
-# Lưu ý: Hệ thống chỉ tập trung vào bệnh lý thực vật (Forest Pathology), không bao gồm côn trùng/sâu hại.
 DISEASE_INFO = {
     "Dom_den": {
         "name": "Bệnh Đốm Đen",
@@ -119,13 +115,14 @@ with st.sidebar:
     st.markdown("**Chức năng hệ thống:**\n1. Chẩn đoán bệnh lý\n2. Phân tích diện tích & Cấp bệnh\n3. Tra cứu dữ liệu")
 
 if uploaded_file is not None:
+    # Fix: Áp dụng ImageOps để xoay ảnh đúng chiều EXIF từ điện thoại
     image_pil = Image.open(uploaded_file)
+    image_pil = ImageOps.exif_transpose(image_pil)
     image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
 else:
     image_pil = None
     image_cv = None
 
-# Tích hợp 3 chức năng thành 3 Tab
 tab1, tab2, tab3 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Phân Tích Cấp Bệnh", "📖 Cơ Sở Dữ Liệu"])
 
 # ---------------------------------------------------------
@@ -144,12 +141,17 @@ with tab1:
                         with c1:
                             st.image(image_pil, caption="Ảnh gốc đầu vào", use_container_width=True)
                         with c2:
-                            res_plotted = res.plot(boxes=False, labels=False)
+                            # Fix: Cho phép hiển thị khung bounding box để xác định vị trí nấm bệnh
+                            res_plotted = res.plot(conf=True, line_width=2)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="AI Nhận diện", use_container_width=True)
                             
                         with c3:
-                            class_id = int(res.boxes.cls[0].item())
-                            conf = float(res.boxes.conf[0].item()) * 100
+                            # Fix: Trích xuất loại bệnh dựa trên bounding box có độ tin cậy cao nhất thay vì ngẫu nhiên
+                            conf_values = res.boxes.conf.cpu().numpy()
+                            best_idx = np.argmax(conf_values)
+                            
+                            class_id = int(res.boxes.cls[best_idx].item())
+                            conf = float(conf_values[best_idx]) * 100
                             pred_name = res.names[class_id].lower()
                             
                             info_key = "Khoe"
@@ -159,7 +161,7 @@ with tab1:
                             info = DISEASE_INFO[info_key]
                             
                             st.markdown(f"### Kết quả: {info['name']}")
-                            st.caption(f"Độ tin cậy: {conf:.1f}%")
+                            st.caption(f"Độ tin cậy cao nhất: {conf:.1f}%")
                             
                             if info_key == "Khoe":
                                 st.success(info['message'])
@@ -175,7 +177,7 @@ with tab1:
                                 <div class="info-card"><b>🛡️ Phòng trừ:</b><br>{info['prevention'].replace(chr(10), '<br>')}</div>
                                 """, unsafe_allow_html=True)
                     else:
-                        st.warning("Mô hình không nhận diện được dấu hiệu bệnh lý (Độ tin cậy > 80%). Có thể lá đang ở trạng thái khỏe mạnh.")
+                        st.warning("Mô hình không nhận diện được dấu hiệu bệnh lý thực vật (Độ tin cậy > 80%). Có thể lá đang ở trạng thái khỏe mạnh.")
     else:
         st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
 
@@ -186,17 +188,18 @@ with tab2:
     if image_cv is not None:
         if st.button("🚀 Phân Tích Mức Độ Bị Hại", type="primary", use_container_width=True, key="btn_seg"):
             if model_capbenh is not None:
-                with st.spinner("AI đang phân tích vùng tổn thương..."):
+                with st.spinner("AI đang phân tích diện tích vùng tổn thương..."):
                     results = model_capbenh.predict(image_cv, conf=0.8)
                     res = results[0]
                     
-                    if len(res.boxes) > 0 and res.masks is not None:
+                    # Fix: Thêm kiểm tra an toàn đảm bảo masks tổn tại (hasattr) để chống crash
+                    if len(res.boxes) > 0 and hasattr(res, 'masks') and res.masks is not None:
                         c1, c2, c3 = st.columns([1, 1, 1.2])
                         with c1:
                             st.image(image_pil, caption="Ảnh gốc", use_container_width=True)
                         with c2:
                             res_plotted = res.plot(boxes=False, labels=False)
-                            st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Vùng tổn thương", use_container_width=True)
+                            st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Vùng bị hại", use_container_width=True)
                             
                         with c3:
                             masks = res.masks.data.cpu().numpy()  
@@ -247,7 +250,7 @@ with tab2:
                             else:
                                 st.success("✅ **Kết luận: Không phát hiện vết bệnh (Cấp 0)**")
                     else:
-                        st.warning("Hệ thống chưa trích xuất được vùng tổn thương trên lá.")
+                        st.warning("Hệ thống chưa trích xuất được vùng tổn thương (Mask) trên lá.")
     else:
         st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để phân tích cấp bệnh.")
 
