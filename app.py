@@ -1,5 +1,10 @@
 import os
 import pathlib
+import streamlit as st
+import cv2
+import numpy as np
+from PIL import Image
+from ultralytics import YOLO
 
 # ==========================================
 # 0. HACK FIX: LỖI TƯƠNG THÍCH WINDOWS -> LINUX CHO PYTORCH
@@ -12,12 +17,6 @@ if os.name != 'nt':
 # ==========================================
 # 1. CẤU HÌNH GIAO DIỆN TRANG WEB
 # ==========================================
-import streamlit as st
-from ultralytics import YOLO
-import cv2
-import numpy as np
-from PIL import Image
-
 st.set_page_config(
     page_title="Chẩn Đoán Bệnh Gõ Đỏ",
     page_icon="🌿",
@@ -46,17 +45,15 @@ st.markdown("""
 # ==========================================
 @st.cache_resource(show_spinner="Đang khởi tạo AI...")
 def load_models():
-    # Bỏ try-except bên trong để tránh Streamlit cache lại Exception gây lỗi hệ thống
-    m_chuandoan = YOLO('model_chuandoan.pt')
-    m_capbenh = YOLO('model_capbenh.pt')
-    return m_chuandoan, m_capbenh
+    try:
+        m_chuandoan = YOLO('model_chuandoan.pt')
+        m_capbenh = YOLO('model_capbenh.pt')
+        return m_chuandoan, m_capbenh
+    except Exception as e:
+        st.error(f"Lỗi tải mô hình: Vui lòng kiểm tra lại file .pt. Chi tiết lỗi: {e}")
+        return None, None
 
-# Load mô hình an toàn ở scope bên ngoài
-try:
-    model_chuandoan, model_capbenh = load_models()
-except Exception as e:
-    st.error(f"Lỗi tải mô hình (PyTorch/YOLO): {e}")
-    model_chuandoan, model_capbenh = None, None
+model_chuandoan, model_capbenh = load_models()
 
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI
@@ -144,10 +141,10 @@ with tab1:
                     if len(res.boxes) > 0:
                         c1, c2, c3 = st.columns([1, 1, 1.5])
                         with c1:
-                            st.image(image_pil, caption="Ảnh gốc đầu vào", use_column_width=True)
+                            st.image(image_pil, caption="Ảnh gốc đầu vào", use_container_width=True)
                         with c2:
                             res_plotted = res.plot(boxes=False, labels=False)
-                            st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="AI Nhận diện", use_column_width=True)
+                            st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="AI Nhận diện", use_container_width=True)
                             
                         with c3:
                             class_id = int(res.boxes.cls[0].item())
@@ -178,7 +175,7 @@ with tab1:
                                 <div class="info-card"><b>🛡️ Phòng trừ:</b><br>{info['prevention'].replace(chr(10), '<br>')}</div>
                                 """, unsafe_allow_html=True)
                     else:
-                        st.warning("Mô hình không nhận diện được dấu hiệu với độ tin cậy > 80%.")
+                        st.warning("Mô hình không nhận diện được dấu hiệu bệnh lý (Độ tin cậy > 80%). Có thể lá đang ở trạng thái khỏe mạnh.")
     else:
         st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
 
@@ -196,10 +193,10 @@ with tab2:
                     if len(res.boxes) > 0 and res.masks is not None:
                         c1, c2, c3 = st.columns([1, 1, 1.2])
                         with c1:
-                            st.image(image_pil, caption="Ảnh gốc", use_column_width=True)
+                            st.image(image_pil, caption="Ảnh gốc", use_container_width=True)
                         with c2:
                             res_plotted = res.plot(boxes=False, labels=False)
-                            st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Segmentation", use_column_width=True)
+                            st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Segmentation", use_container_width=True)
                             
                         with c3:
                             masks = res.masks.data.cpu().numpy()  
@@ -232,7 +229,7 @@ with tab2:
                                 
                             st.markdown(f"""
                             <div>
-                                <div class='metric-label'>Lá bị hại</div>
+                                <div class='metric-label'>Tỷ lệ lá bị hại</div>
                                 <div class='metric-value'>{infected_percentage}%</div>
                             </div>
                             """, unsafe_allow_html=True)
@@ -250,7 +247,7 @@ with tab2:
                             else:
                                 st.success("✅ **Kết luận: Không phát hiện vết bệnh (Cấp 0)**")
                     else:
-                        st.warning("Chưa trích xuất được Mask tổn thương.")
+                        st.warning("Hệ thống chưa trích xuất được Mask tổn thương trên lá.")
     else:
         st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để Đo lường cấp bệnh.")
 
@@ -258,9 +255,8 @@ with tab2:
 # TAB 3: TỪ ĐIỂN TRA CỨU
 # ---------------------------------------------------------
 with tab3:
-    st.markdown("### 📖 Hệ Thống Cơ Sở Dữ thực Bệnh Hại")
+    st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Lâm Sinh")
     
-    # Tạo menu thả xuống để chọn bệnh
     disease_options = {
         "Bệnh Đốm Đen": "Dom_den",
         "Cháy Lá Sinh Lý": "Chay_la_sinh_ly",
@@ -275,9 +271,8 @@ with tab3:
     col_dict1, col_dict2 = st.columns([1, 1.2])
     
     with col_dict1:
-        # Kiểm tra và tải ảnh từ local folder GitHub
         if os.path.exists(dict_info['image']):
-            st.image(dict_info['image'], caption=f"Hình ảnh thực tế: {dict_info['name']}", use_column_width=True)
+            st.image(dict_info['image'], caption=f"Hình ảnh thực tế: {dict_info['name']}", use_container_width=True)
         else:
             st.info(f"⚠️ Chưa tìm thấy file ảnh `{dict_info['image']}` trên hệ thống.")
             
