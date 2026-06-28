@@ -9,8 +9,8 @@ from ultralytics import YOLO
 # ==========================================
 # 0. HACK FIX: LỖI TƯƠNG THÍCH WINDOWS -> LINUX CHO PYTORCH
 # ==========================================
-# Khi train model trên Windows, file .pt lưu cấu trúc đường dẫn của Windows.
-# Streamlit Cloud chạy Linux sẽ bị crash. Dòng này giúp 'dịch' đường dẫn sang chuẩn Linux.
+# Dòng này giúp 'dịch' cấu trúc đường dẫn từ môi trường Windows (khi train model) 
+# sang chuẩn Linux trên Streamlit Cloud, tránh lỗi crash hệ thống.
 if os.name != 'nt':
     pathlib.WindowsPath = pathlib.PosixPath
 
@@ -24,7 +24,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- CSS Rút Gọn Để Vừa 1 Trang ---
+# --- CSS Tối Ưu Giao Diện Web ---
 st.markdown("""
 <style>
     .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
@@ -56,8 +56,9 @@ def load_models():
 model_chuandoan, model_capbenh = load_models()
 
 # ==========================================
-# 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI
+# 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
+# Lưu ý: Hệ thống chỉ tập trung vào bệnh lý thực vật (Forest Pathology), không bao gồm côn trùng/sâu hại.
 DISEASE_INFO = {
     "Dom_den": {
         "name": "Bệnh Đốm Đen",
@@ -101,7 +102,7 @@ DISEASE_INFO = {
     },
     "Khoe": {
         "name": "Lá Khỏe Mạnh",
-        "message": "Cây phát triển tốt. Không phát hiện nấm bệnh hay tổn thương sinh lý trên bề mặt lá Gõ đỏ (Nhóm gỗ I)."
+        "message": "Cây phát triển tốt. Không phát hiện nấm bệnh hay tổn thương sinh lý trên bề mặt lá Gõ đỏ (loài gỗ Nhóm I mang giá trị kinh tế và bảo tồn cao)."
     }
 }
 
@@ -115,7 +116,7 @@ with st.sidebar:
     uploaded_file = st.file_uploader("Chọn ảnh lá cây", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     st.caption("Khuyến nghị: Chụp rõ bề mặt lá, đủ sáng.")
     st.divider()
-    st.markdown("**Chức năng hệ thống:**\n1. Chẩn đoán\n2. Tính Mức độ bị hại & Cấp bệnh\n3. Tra cứu")
+    st.markdown("**Chức năng hệ thống:**\n1. Chẩn đoán bệnh lý\n2. Phân tích diện tích & Cấp bệnh\n3. Tra cứu dữ liệu")
 
 if uploaded_file is not None:
     image_pil = Image.open(uploaded_file)
@@ -124,8 +125,8 @@ else:
     image_pil = None
     image_cv = None
 
-# Tích hợp 3 chức năng thành 3 Tab cố định
-tab1, tab2, tab3 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Tính Cấp Bệnh", "📖 Từ Điển Tra Cứu"])
+# Tích hợp 3 chức năng thành 3 Tab
+tab1, tab2, tab3 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Phân Tích Cấp Bệnh", "📖 Cơ Sở Dữ Liệu"])
 
 # ---------------------------------------------------------
 # TAB 1: CHẨN ĐOÁN BỆNH
@@ -151,7 +152,6 @@ with tab1:
                             conf = float(res.boxes.conf[0].item()) * 100
                             pred_name = res.names[class_id].lower()
                             
-                            # Ánh xạ theo model
                             info_key = "Khoe"
                             if "dom" in pred_name: info_key = "Dom_den"
                             elif "chay" in pred_name: info_key = "Chay_la_sinh_ly"
@@ -180,13 +180,13 @@ with tab1:
         st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
 
 # ---------------------------------------------------------
-# TAB 2: TÍNH TỶ LỆ (SEGMENTATION)
+# TAB 2: TÍNH TỶ LỆ VÀ CẤP BỆNH (SEGMENTATION)
 # ---------------------------------------------------------
 with tab2:
     if image_cv is not None:
-        if st.button("🚀 Tính Mức độ bị hại & Cấp bệnh", type="primary", use_container_width=True, key="btn_seg"):
+        if st.button("🚀 Phân Tích Mức Độ Bị Hại", type="primary", use_container_width=True, key="btn_seg"):
             if model_capbenh is not None:
-                with st.spinner("AI đang nội suy mask..."):
+                with st.spinner("AI đang phân tích vùng tổn thương..."):
                     results = model_capbenh.predict(image_cv, conf=0.8)
                     res = results[0]
                     
@@ -196,7 +196,7 @@ with tab2:
                             st.image(image_pil, caption="Ảnh gốc", use_container_width=True)
                         with c2:
                             res_plotted = res.plot(boxes=False, labels=False)
-                            st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Segmentation", use_container_width=True)
+                            st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Vùng tổn thương", use_container_width=True)
                             
                         with c3:
                             masks = res.masks.data.cpu().numpy()  
@@ -247,15 +247,15 @@ with tab2:
                             else:
                                 st.success("✅ **Kết luận: Không phát hiện vết bệnh (Cấp 0)**")
                     else:
-                        st.warning("Hệ thống chưa trích xuất được Mask tổn thương trên lá.")
+                        st.warning("Hệ thống chưa trích xuất được vùng tổn thương trên lá.")
     else:
-        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để Đo lường cấp bệnh.")
+        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để phân tích cấp bệnh.")
 
 # ---------------------------------------------------------
 # TAB 3: TỪ ĐIỂN TRA CỨU
 # ---------------------------------------------------------
 with tab3:
-    st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Lâm Sinh")
+    st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
     
     disease_options = {
         "Bệnh Đốm Đen": "Dom_den",
