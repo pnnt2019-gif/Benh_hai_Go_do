@@ -1,10 +1,4 @@
 import os
-import sys
-
-# ==========================================
-# 0. LỆNH CƯỠNG CHẾ XÓA LỖI (PHẢI NẰM TRÊN CÙNG)
-# ==========================================
-os.system(f"{sys.executable} -m pip uninstall -y opencv-python")
 
 # ==========================================
 # 1. CẤU HÌNH GIAO DIỆN TRANG WEB
