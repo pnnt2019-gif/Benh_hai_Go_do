@@ -2,4 +2,7 @@ streamlit
 ultralytics
 Pillow
 numpy<2.0.0
-opencv-python
+opencv-python-headless
+libsm6
+libxext6
+libxrender-dev
