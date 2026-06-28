@@ -1,4 +1,13 @@
 import os
+import pathlib
+
+# ==========================================
+# 0. HACK FIX: LỖI TƯƠNG THÍCH WINDOWS -> LINUX CHO PYTORCH
+# ==========================================
+# Khi train model trên Windows, file .pt lưu cấu trúc đường dẫn của Windows.
+# Streamlit Cloud chạy Linux sẽ bị crash. Dòng này giúp 'dịch' đường dẫn sang chuẩn Linux.
+if os.name != 'nt':
+    pathlib.WindowsPath = pathlib.PosixPath
 
 # ==========================================
 # 1. CẤU HÌNH GIAO DIỆN TRANG WEB
@@ -35,17 +44,19 @@ st.markdown("""
 # ==========================================
 # 2. TẢI MÔ HÌNH
 # ==========================================
-@st.cache_resource
+@st.cache_resource(show_spinner="Đang khởi tạo AI...")
 def load_models():
-    try:
-        model_chuandoan = YOLO('model_chuandoan.pt')
-        model_capbenh = YOLO('model_capbenh.pt')
-        return model_chuandoan, model_capbenh
-    except Exception as e:
-        st.error(f"Không tìm thấy mô hình. Lỗi: {e}")
-        return None, None
+    # Bỏ try-except bên trong để tránh Streamlit cache lại Exception gây lỗi hệ thống
+    m_chuandoan = YOLO('model_chuandoan.pt')
+    m_capbenh = YOLO('model_capbenh.pt')
+    return m_chuandoan, m_capbenh
 
-model_chuandoan, model_capbenh = load_models()
+# Load mô hình an toàn ở scope bên ngoài
+try:
+    model_chuandoan, model_capbenh = load_models()
+except Exception as e:
+    st.error(f"Lỗi tải mô hình (PyTorch/YOLO): {e}")
+    model_chuandoan, model_capbenh = None, None
 
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI
@@ -247,7 +258,7 @@ with tab2:
 # TAB 3: TỪ ĐIỂN TRA CỨU
 # ---------------------------------------------------------
 with tab3:
-    st.markdown("### 📖 Hệ Thống Cơ Sở Dữ Liệu Bệnh Hại")
+    st.markdown("### 📖 Hệ Thống Cơ Sở Dữ thực Bệnh Hại")
     
     # Tạo menu thả xuống để chọn bệnh
     disease_options = {
