@@ -72,7 +72,7 @@ DISEASE_INFO = {
         "order": "Không",
         "family": "Không",
         "cause": "Yếu tố phi sinh học: sốc nhiệt, gió, muối, ô nhiễm hoặc mất cân bằng dinh dưỡng.",
-        "symptoms": "Mô lá khô lại, teo tóp, giòn, màu nâu/xám. Bề mặt nhẵn, KHÔNG có dấu hiệu bào tử nấm.",
+        "symptoms": "Mô lá khô lại, teo tóp, giòn, màu nâu/xám. Bề mặt nhẵn, không có dấu hiệu bào tử nấm.",
         "prevention": "- Không sử dụng thuốc bảo vệ thực vật. Trọng tâm là điều chỉnh vi khí hậu vườn ươm.\n- Trang bị lưới che giảm 50 - 70% ánh sáng, điều chỉnh chế độ tưới tránh gây sốc nước.\n- Phun bổ sung phân bón lá hữu cơ (Amino Acid nồng độ loãng) để giải tỏa stress và kích thích cây phục hồi.",
         "image": "chay_la_sinh_ly.jpg"
     },
