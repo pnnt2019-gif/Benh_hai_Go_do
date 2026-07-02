@@ -161,7 +161,12 @@ with tab1:
                             info = DISEASE_INFO[info_key]
                             
                             st.markdown(f"### Kết quả: {info['name']}")
-                            st.caption(f"Độ tin cậy cao nhất: {conf:.1f}%")
+                            
+                            # --- ĐÃ CHỈNH SỬA TẠI ĐÂY ---
+                            # Đổi dấu chấm thành dấu phẩy và thêm CSS in đậm chữ đỏ
+                            conf_display = f"{conf:.1f}".replace('.', ',')
+                            st.markdown(f"<div style='color: red; font-weight: bold; font-size: 1.1rem; margin-bottom: 12px;'>Độ tin cậy: {conf_display}%</div>", unsafe_allow_html=True)
+                            # -----------------------------
                             
                             if info_key == "Khoe":
                                 st.success(info['message'])
