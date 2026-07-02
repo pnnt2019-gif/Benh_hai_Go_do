@@ -192,7 +192,7 @@ with tab2:
                     results = model_capbenh.predict(image_cv, conf=0.8)
                     res = results[0]
                     
-                    # Fix: Thêm kiểm tra an toàn đảm bảo masks tổn tại (hasattr) để chống crash
+                    # Fix: Thêm kiểm tra an toàn đảm bảo masks tồn tại (hasattr) để chống crash
                     if len(res.boxes) > 0 and hasattr(res, 'masks') and res.masks is not None:
                         c1, c2, c3 = st.columns([1, 1, 1.2])
                         with c1:
@@ -229,17 +229,15 @@ with tab2:
                                 infected_percentage = round(infected_percentage, 2)
                             else:
                                 infected_percentage = 0.0
+                            
+                            # Định dạng hiển thị dấu thập phân dạng dấu phẩy theo chuẩn Việt Nam
                             display_percentage = f"{infected_percentage:.2f}".replace('.', ',')
-                            st.markdown(f"""
-<div>
-    <div class='metric-label'>Mức độ bị hại</div>
-    <div class='metric-value'>{display_percentage}%</div>
-</div>
-""", unsafe_allow_html=True)                            
+                            
+                            # Hiển thị khối Metric duy nhất: Mức độ bị hại
                             st.markdown(f"""
                             <div>
-                                <div class='metric-label'>Mức độ lá bị hại</div>
-                                <div class='metric-value'>{infected_percentage}%</div>
+                                <div class='metric-label'>Mức độ bị hại</div>
+                                <div class='metric-value'>{display_percentage}%</div>
                             </div>
                             """, unsafe_allow_html=True)
                             
