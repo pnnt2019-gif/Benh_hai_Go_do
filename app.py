@@ -73,7 +73,7 @@ DISEASE_INFO = {
         "family": "Không",
         "cause": "Yếu tố phi sinh học: sốc nhiệt, gió, muối, ô nhiễm hoặc mất cân bằng dinh dưỡng.",
         "symptoms": "Mô lá khô lại, teo tóp, giòn, màu nâu/xám. Bề mặt nhẵn, KHÔNG có dấu hiệu bào tử nấm.",
-        "prevention": "- KHÔNG sử dụng thuốc BVTV. Trọng tâm là điều chỉnh vi khí hậu vườn ươm.\n- Trang bị lưới che giảm 50 - 70% ánh sáng, điều chỉnh chế độ tưới tránh gây sốc nước.\n- Phun bổ sung phân bón lá hữu cơ (Amino Acid nồng độ loãng) để giải tỏa stress và kích thích cây phục hồi.",
+        "prevention": "- Không sử dụng thuốc bảo vệ thực vật. Trọng tâm là điều chỉnh vi khí hậu vườn ươm.\n- Trang bị lưới che giảm 50 - 70% ánh sáng, điều chỉnh chế độ tưới tránh gây sốc nước.\n- Phun bổ sung phân bón lá hữu cơ (Amino Acid nồng độ loãng) để giải tỏa stress và kích thích cây phục hồi.",
         "image": "chay_la_sinh_ly.jpg"
     },
     "Chay_la": {
@@ -93,7 +93,7 @@ DISEASE_INFO = {
         "family": "Mycosphaerellaceae",
         "cause": "Do nấm <i>Cercospora</i> sp. gây ra.",
         "symptoms": "Vết tổn thương cục bộ ở hai mặt lá, hình tròn/bầu dục hoặc bất định. Vùng mô bệnh màu nâu sẫm, rìa ngoài bao quanh bởi quầng sáng màu vàng nhạt phân định rõ ràng.",
-        "prevention": "Sử dụng thuốc: Ưu tiên dùng chế phẩm sinh học chứa Bacillus subtilis / Trichoderma spp. (2 - 3 g/lít nước). Nếu bệnh nặng có thể dùng thuốc hóa học Propiconazole (1 ml/lít nước).\n Cách thức: Phun ướt đều cả hai mặt lá để ngăn chặn nấm xâm nhiễm và kìm hãm bào tử nảy mầm.",
+        "prevention": "Sử dụng thuốc: - Ưu tiên dùng chế phẩm sinh học chứa Bacillus subtilis / Trichoderma spp. (2 - 3 g/lít nước). Nếu bệnh nặng có thể dùng thuốc hóa học Propiconazole (1 ml/lít nước).\n - Cách thức: Phun ướt đều cả hai mặt lá để ngăn chặn nấm xâm nhiễm và kìm hãm bào tử nảy mầm.",
         "image": "dom_nau.jpg"
     },
     "Khoe": {
