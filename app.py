@@ -88,12 +88,12 @@ DISEASE_INFO = {
     },
     "Dom_nau": {
         "name": "Bệnh Đốm Nâu",
-        "scientific": "Curvularia sp.",
-        "order": "Pleosporales",
-        "family": "Pleosporaceae",
-        "cause": "Do nấm <i>Curvularia</i> sp. gây ra.",
+        "scientific": "Cercospora spp.",
+        "order": "Mycosphaerellales",
+        "family": "Mycosphaerellaceae",
+        "cause": "Do nấm <i>Cercospora</i> sp. gây ra.",
         "symptoms": "Vết tổn thương cục bộ ở hai mặt lá, hình tròn/bầu dục hoặc bất định. Vùng mô bệnh màu nâu sẫm, rìa ngoài bao quanh bởi quầng sáng màu vàng nhạt phân định rõ ràng.",
-        "prevention": "- Ưu tiên chế phẩm sinh học chứa Bacillus subtilis / Trichoderma viride (2 - 3 g/lít nước) hoặc thuốc hóa học chứa Propiconazole (1 ml/lít nước).\n- Phun ướt đều hai mặt lá để ngăn chặn sự xâm nhiễm và kìm hãm nảy mầm bào tử.",
+        "prevention": "Sử dụng thuốc: Ưu tiên dùng chế phẩm sinh học chứa Bacillus subtilis / Trichoderma spp. (2 - 3 g/lít nước). Nếu bệnh nặng có thể dùng thuốc hóa học Propiconazole (1 ml/lít nước).\n Cách thức: Phun ướt đều cả hai mặt lá để ngăn chặn nấm xâm nhiễm và kìm hãm bào tử nảy mầm.",
         "image": "dom_nau.jpg"
     },
     "Khoe": {
