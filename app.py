@@ -230,7 +230,7 @@ with tab2:
                             else:
                                 infected_percentage = 0.0
                             display_percentage = f"{infected_percentage:.2f}".replace('.', ',')
-                                
+                                                        
                             st.markdown(f"""
                             <div>
                                 <div class='metric-label'>Mức độ lá bị hại</div>
