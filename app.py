@@ -55,9 +55,10 @@ model_chuandoan, model_capbenh = load_models()
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
+# ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên
 DISEASE_INFO = {
     "Dom_den": {
-        "name": "Bệnh Đốm Đen",
+        "name": "Bệnh đốm đen",
         "scientific": "Stemphylium sp.",
         "order": "Pleosporales",
         "family": "Pleosporaceae",
@@ -67,7 +68,7 @@ DISEASE_INFO = {
         "image": "dom_den.jpg"
     },
     "Chay_la_sinh_ly": {
-        "name": "Cháy Lá Sinh Lý",
+        "name": "Cháy lá sinh lý",
         "scientific": "Abiotic stress",
         "order": "Không",
         "family": "Không",
@@ -77,7 +78,7 @@ DISEASE_INFO = {
         "image": "chay_la_sinh_ly.jpg"
     },
     "Chay_la": {
-        "name": "Bệnh Cháy Lá",
+        "name": "Bệnh cháy lá",
         "scientific": "Xylella fastidiosa",
         "order": "Lysobacterales",
         "family": "Xanthomonadaceae",
@@ -87,7 +88,7 @@ DISEASE_INFO = {
         "image": "chay_la.jpg"
     },
     "Dom_nau": {
-        "name": "Bệnh Đốm Nâu",
+        "name": "Bệnh đốm nâu",
         "scientific": "Cercospora spp.",
         "order": "Mycosphaerellales",
         "family": "Mycosphaerellaceae",
@@ -97,7 +98,7 @@ DISEASE_INFO = {
         "image": "dom_nau.jpg"
     },
     "Khoe": {
-        "name": "Lá Khỏe Mạnh",
+        "name": "Lá khỏe mạnh",
         "message": "Cây phát triển tốt. Không phát hiện nấm bệnh hay tổn thương sinh lý trên bề mặt lá Gõ đỏ (loài gỗ Nhóm I mang giá trị kinh tế và bảo tồn cao)."
     }
 }
@@ -162,11 +163,9 @@ with tab1:
                             
                             st.markdown(f"### Kết quả: {info['name']}")
                             
-                            # --- ĐÃ CHỈNH SỬA TẠI ĐÂY ---
                             # Đổi dấu chấm thành dấu phẩy và thêm CSS in đậm chữ đỏ
                             conf_display = f"{conf:.1f}".replace('.', ',')
                             st.markdown(f"<div style='color: red; font-weight: bold; font-size: 1.1rem; margin-bottom: 12px;'>Độ tin cậy: {conf_display}%</div>", unsafe_allow_html=True)
-                            # -----------------------------
                             
                             if info_key == "Khoe":
                                 st.success(info['message'])
@@ -269,11 +268,12 @@ with tab2:
 with tab3:
     st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
     
+    # ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên trong danh sách dropdown
     disease_options = {
-        "Bệnh Đốm Đen": "Dom_den",
-        "Cháy Lá Sinh Lý": "Chay_la_sinh_ly",
-        "Bệnh Cháy Lá (Vi khuẩn)": "Chay_la",
-        "Bệnh Đốm Nâu": "Dom_nau"
+        "Bệnh đốm đen": "Dom_den",
+        "Cháy lá sinh lý": "Chay_la_sinh_ly",
+        "Bệnh cháy lá (Vi khuẩn)": "Chay_la",
+        "Bệnh đốm nâu": "Dom_nau"
     }
     
     selected_disease_name = st.selectbox("Chọn loại bệnh để tra cứu chi tiết:", list(disease_options.keys()))
