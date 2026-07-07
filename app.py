@@ -34,6 +34,8 @@ st.markdown("""
     img { max-height: 380px !important; object-fit: contain !important; border-radius: 8px; }
     .metric-value { font-size: 2.5rem; font-weight: 800; color: #be123c; line-height: 1.1; }
     .metric-label { font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+    div[role="radiogroup"] { gap: 6px; }
+    div[role="radiogroup"] label { background-color: #f1f5f9; padding: 8px 16px; border-radius: 8px 8px 0 0; border-bottom: 3px solid transparent; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -55,7 +57,6 @@ model_chuandoan, model_capbenh = load_models()
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
-# ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên
 DISEASE_INFO = {
     "Dom_den": {
         "name": "Đốm đen",
@@ -124,19 +125,38 @@ else:
     image_pil = None
     image_cv = None
 
-tab1, tab2, tab3 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Phân Tích Cấp Bệnh", "📖 Cơ Sở Dữ Liệu"])
+# ==========================================
+# ĐÃ SỬA: Thay st.tabs() bằng st.radio() để chọn màn hình.
+# Lý do: st.tabs() render sẵn cả 3 khối nội dung trong DOM và chỉ ẩn/hiện
+# bằng CSS. Nếu CSS tuỳ chỉnh, cache trình duyệt cũ, hoặc phiên bản
+# Streamlit trên server có xung đột, phần nội dung ẩn có thể bị lộ ra,
+# gây hiện tượng nội dung các tab chồng/lẫn lên nhau.
+# Với st.radio(), tại một thời điểm CHỈ MỘT khối if/elif/else được thực
+# thi và vẽ ra, nên không thể xảy ra tình trạng lẫn nội dung giữa các tab.
+# ==========================================
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = "🔍 Chẩn Đoán Bệnh"
+
+active_tab = st.radio(
+    "Chọn chức năng",
+    ["🔍 Chẩn Đoán Bệnh", "📊 Phân Tích Cấp Bệnh", "📖 Cơ Sở Dữ Liệu"],
+    horizontal=True,
+    label_visibility="collapsed",
+    key="active_tab"
+)
+st.divider()
 
 # ---------------------------------------------------------
-# TAB 1: CHẨN ĐOÁN BỆNH
+# MÀN 1: CHẨN ĐOÁN BỆNH
 # ---------------------------------------------------------
-with tab1:
+if active_tab == "🔍 Chẩn Đoán Bệnh":
     if image_cv is not None:
         if st.button("🚀 Chẩn đoán", type="primary", use_container_width=True, key="btn_class"):
             if model_chuandoan is not None:
                 with st.spinner("Đang chẩn đoán..."):
                     results = model_chuandoan.predict(image_cv, conf=0.8)
                     res = results[0]
-                    
+
                     if len(res.boxes) > 0:
                         c1, c2, c3 = st.columns([1, 1, 1.5])
                         with c1:
@@ -145,28 +165,28 @@ with tab1:
                             # Fix: Cho phép hiển thị khung bounding box để xác định vị trí nấm bệnh
                             res_plotted = res.plot(conf=True, line_width=2)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="AI Nhận diện", use_container_width=True)
-                            
+
                         with c3:
                             # Fix: Trích xuất loại bệnh dựa trên bounding box có độ tin cậy cao nhất thay vì ngẫu nhiên
                             conf_values = res.boxes.conf.cpu().numpy()
                             best_idx = np.argmax(conf_values)
-                            
+
                             class_id = int(res.boxes.cls[best_idx].item())
                             conf = float(conf_values[best_idx]) * 100
                             pred_name = res.names[class_id].lower()
-                            
+
                             info_key = "Khoe"
                             if "dom" in pred_name: info_key = "Dom_den"
                             elif "chay" in pred_name: info_key = "Chay_la_sinh_ly"
-                            
+
                             info = DISEASE_INFO[info_key]
-                            
+
                             st.markdown(f"### Kết quả: {info['name']}")
-                            
+
                             # Đổi dấu chấm thành dấu phẩy và thêm CSS in đậm chữ đỏ
                             conf_display = f"{conf:.1f}".replace('.', ',')
                             st.markdown(f"<div style='color: red; font-weight: bold; font-size: 1.1rem; margin-bottom: 12px;'>Độ tin cậy: {conf_display}%</div>", unsafe_allow_html=True)
-                            
+
                             if info_key == "Khoe":
                                 st.success(info['message'])
                             else:
@@ -174,7 +194,7 @@ with tab1:
                                     st.markdown(f"**Khoa học:** <i>{info['scientific']}</i> | **Bộ:** {info['order']} | **Họ:** {info['family']}", unsafe_allow_html=True)
                                 else:
                                     st.markdown(f"**Loại:** <i>{info['scientific']}</i> (Yếu tố môi trường)", unsafe_allow_html=True)
-                                
+
                                 st.markdown(f"""
                                 <div class="info-card danger-card"><b>🔴 Triệu chứng:</b> {info['symptoms']}</div>
                                 <div class="info-card warning-card"><b>🔬 Nguyên nhân:</b> {info['cause']}</div>
@@ -186,16 +206,16 @@ with tab1:
         st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
 
 # ---------------------------------------------------------
-# TAB 2: TÍNH TỶ LỆ VÀ CẤP BỆNH (SEGMENTATION)
+# MÀN 2: TÍNH TỶ LỆ VÀ CẤP BỆNH (SEGMENTATION)
 # ---------------------------------------------------------
-with tab2:
+elif active_tab == "📊 Phân Tích Cấp Bệnh":
     if image_cv is not None:
         if st.button("🚀 Phân Tích Mức Độ Bị Hại", type="primary", use_container_width=True, key="btn_seg"):
             if model_capbenh is not None:
                 with st.spinner("AI đang phân tích diện tích vùng tổn thương..."):
                     results = model_capbenh.predict(image_cv, conf=0.8)
                     res = results[0]
-                    
+
                     # Fix: Thêm kiểm tra an toàn đảm bảo masks tồn tại (hasattr) để chống crash
                     if len(res.boxes) > 0 and hasattr(res, 'masks') and res.masks is not None:
                         c1, c2, c3 = st.columns([1, 1, 1.2])
@@ -204,39 +224,39 @@ with tab2:
                         with c2:
                             res_plotted = res.plot(boxes=False, labels=False)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="Vùng bị hại", use_container_width=True)
-                            
+
                         with c3:
-                            masks = res.masks.data.cpu().numpy()  
-                            classes = res.boxes.cls.cpu().numpy() 
-                            
+                            masks = res.masks.data.cpu().numpy()
+                            classes = res.boxes.cls.cpu().numpy()
+
                             total_leaf_mask = np.zeros(masks[0].shape, dtype=bool)
                             disease_mask = np.zeros(masks[0].shape, dtype=bool)
-                            
+
                             for i, cls_id in enumerate(classes):
                                 mask_binary = masks[i] > 0.5
                                 total_leaf_mask = np.logical_or(total_leaf_mask, mask_binary)
                                 name_lower = res.names[int(cls_id)].lower()
                                 if "vet" in name_lower:
                                     disease_mask = np.logical_or(disease_mask, mask_binary)
-                            
+
                             leaf_pixels = int(np.sum(total_leaf_mask))
                             disease_pixels = int(np.sum(disease_mask))
-                                
+
                             st.markdown("### Kết Quả Đo Lường")
                             st.markdown("<div style='margin-bottom: 10px;'>", unsafe_allow_html=True)
                             st.caption(f"📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}")
                             st.caption(f"📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}")
                             st.markdown("</div>", unsafe_allow_html=True)
-                            
+
                             if leaf_pixels > 0:
                                 infected_percentage = (disease_pixels / leaf_pixels) * 100
                                 infected_percentage = round(infected_percentage, 2)
                             else:
                                 infected_percentage = 0.0
-                            
+
                             # Định dạng hiển thị dấu thập phân dạng dấu phẩy theo chuẩn Việt Nam
                             display_percentage = f"{infected_percentage:.2f}".replace('.', ',')
-                            
+
                             # Hiển thị khối Metric duy nhất: Mức độ bị hại
                             st.markdown(f"""
                             <div>
@@ -244,14 +264,14 @@ with tab2:
                                 <div class='metric-value'>{display_percentage}%</div>
                             </div>
                             """, unsafe_allow_html=True)
-                            
+
                             level, muc_do = 0, "Khỏe mạnh"
                             if infected_percentage > 0:
                                 if infected_percentage < 25: level, muc_do = 1, "Hại nhẹ"
                                 elif infected_percentage < 50: level, muc_do = 2, "Hại vừa"
                                 elif infected_percentage < 75: level, muc_do = 3, "Hại nặng"
                                 else: level, muc_do = 4, "Hại rất nặng"
-                            
+
                             st.progress(int(min(infected_percentage, 100)))
                             if level > 0:
                                 st.error(f"⚠️ **Kết luận: BỆNH CẤP {level} ({muc_do})**")
@@ -263,40 +283,39 @@ with tab2:
         st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để phân tích cấp bệnh.")
 
 # ---------------------------------------------------------
-# TAB 3: TỪ ĐIỂN TRA CỨU
+# MÀN 3: TỪ ĐIỂN TRA CỨU
 # ---------------------------------------------------------
-with tab3:
+else:
     st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
-    
-    # ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên trong danh sách dropdown
+
     disease_options = {
         "Đốm đen": "Dom_den",
         "Cháy lá sinh lý": "Chay_la_sinh_ly",
         "Cháy lá (Vi khuẩn)": "Chay_la",
         "Đốm nâu": "Dom_nau"
     }
-    
+
     selected_disease_name = st.selectbox("Chọn loại bệnh để tra cứu chi tiết:", list(disease_options.keys()))
     selected_key = disease_options[selected_disease_name]
     dict_info = DISEASE_INFO[selected_key]
-    
+
     col_dict1, col_dict2 = st.columns([1, 1.2])
-    
+
     with col_dict1:
         if os.path.exists(dict_info['image']):
             st.image(dict_info['image'], caption=f"Hình ảnh thực tế: {dict_info['name']}", use_container_width=True)
         else:
             st.info(f"⚠️ Chưa tìm thấy file ảnh `{dict_info['image']}` trên hệ thống.")
-            
+
     with col_dict2:
         st.markdown(f"## {dict_info['name']}")
-        
+
         if dict_info['order'] != "Không":
             st.markdown(f"**Tên khoa học:** <i>{dict_info['scientific']}</i>", unsafe_allow_html=True)
             st.markdown(f"**Bộ:** {dict_info['order']} | **Họ:** {dict_info['family']}")
         else:
             st.markdown(f"**Tên khoa học:** <i>{dict_info['scientific']}</i> (Yếu tố phi sinh học)", unsafe_allow_html=True)
-            
+
         st.markdown("---")
         st.markdown(f"""
         <div class="info-card warning-card"><b>🔬 Nguyên nhân:</b> {dict_info['cause']}</div>
