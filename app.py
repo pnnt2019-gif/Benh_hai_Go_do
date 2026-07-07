@@ -58,7 +58,7 @@ model_chuandoan, model_capbenh = load_models()
 # ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên
 DISEASE_INFO = {
     "Dom_den": {
-        "name": "Bệnh đốm đen",
+        "name": "Đốm đen",
         "scientific": "Stemphylium sp.",
         "order": "Pleosporales",
         "family": "Pleosporaceae",
@@ -78,7 +78,7 @@ DISEASE_INFO = {
         "image": "chay_la_sinh_ly.jpg"
     },
     "Chay_la": {
-        "name": "Bệnh cháy lá",
+        "name": "Cháy lá",
         "scientific": "Xylella fastidiosa",
         "order": "Lysobacterales",
         "family": "Xanthomonadaceae",
@@ -88,7 +88,7 @@ DISEASE_INFO = {
         "image": "chay_la.jpg"
     },
     "Dom_nau": {
-        "name": "Bệnh đốm nâu",
+        "name": "Đốm nâu",
         "scientific": "Cercospora spp.",
         "order": "Mycosphaerellales",
         "family": "Mycosphaerellaceae",
@@ -270,10 +270,10 @@ with tab3:
     
     # ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên trong danh sách dropdown
     disease_options = {
-        "Bệnh đốm đen": "Dom_den",
+        "Đốm đen": "Dom_den",
         "Cháy lá sinh lý": "Chay_la_sinh_ly",
-        "Bệnh cháy lá (Vi khuẩn)": "Chay_la",
-        "Bệnh đốm nâu": "Dom_nau"
+        "Cháy lá (Vi khuẩn)": "Chay_la",
+        "Đốm nâu": "Dom_nau"
     }
     
     selected_disease_name = st.selectbox("Chọn loại bệnh để tra cứu chi tiết:", list(disease_options.keys()))
