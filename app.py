@@ -128,7 +128,10 @@ tab1, tab2, tab3 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Phân Tích Cấp
 # TAB 1: CHẨN ĐOÁN BỆNH
 # ---------------------------------------------------------
 with tab1:
-    if image_cv is not None:
+    st.write("") # Dòng trống đệm
+    if image_cv is None:
+        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
+    else:
         if st.button("🚀 Chẩn đoán", type="primary", use_container_width=True, key="btn_class"):
             if model_chuandoan is not None:
                 with st.spinner("Đang chẩn đoán..."):
@@ -176,14 +179,15 @@ with tab1:
                                 """, unsafe_allow_html=True)
                     else:
                         st.warning("Mô hình không nhận diện được dấu hiệu bệnh lý thực vật (Độ tin cậy > 80%). Có thể lá đang ở trạng thái khỏe mạnh.")
-    else:
-        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
 
 # ---------------------------------------------------------
 # TAB 2: TÍNH TỶ LỆ VÀ CẤP BỆNH (SEGMENTATION)
 # ---------------------------------------------------------
 with tab2:
-    if image_cv is not None:
+    st.write("") # Dòng trống đệm
+    if image_cv is None:
+        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để phân tích cấp bệnh.")
+    else:
         if st.button("🚀 Phân Tích Mức Độ Bị Hại", type="primary", use_container_width=True, key="btn_seg"):
             if model_capbenh is not None:
                 with st.spinner("AI đang phân tích diện tích vùng tổn thương..."):
@@ -215,7 +219,6 @@ with tab2:
                             leaf_pixels = int(np.sum(total_leaf_mask))
                             disease_pixels = int(np.sum(disease_mask))
                             
-                            # ĐÃ SỬA: Gộp chung thành 1 đoạn HTML duy nhất để không làm vỡ DOM
                             st.markdown("### Kết Quả Đo Lường")
                             st.markdown(f"""
                             <div style='margin-bottom: 10px; font-size: 0.9rem; color: #64748b;'>
@@ -253,13 +256,12 @@ with tab2:
                                 st.success("✅ **Kết luận: Không phát hiện vết bệnh (Cấp 0)**")
                     else:
                         st.warning("Hệ thống chưa trích xuất được vùng tổn thương (Mask) trên lá.")
-    else:
-        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để phân tích cấp bệnh.")
 
 # ---------------------------------------------------------
 # TAB 3: TỪ ĐIỂN TRA CỨU
 # ---------------------------------------------------------
 with tab3:
+    st.write("") # Dòng trống đệm
     st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
     
     disease_options = {
