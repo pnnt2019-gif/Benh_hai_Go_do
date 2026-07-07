@@ -1,6 +1,8 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+ultralytics
 opencv-python-headless
 streamlit
-ultralytics
 numpy
 pillow
-# ... các thư viện khác của bạn
