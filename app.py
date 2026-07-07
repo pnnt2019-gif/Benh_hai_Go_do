@@ -55,6 +55,7 @@ model_chuandoan, model_capbenh = load_models()
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
+# ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên
 DISEASE_INFO = {
     "Dom_den": {
         "name": "Đốm đen",
@@ -115,6 +116,7 @@ with st.sidebar:
     st.markdown("**Chức năng hệ thống:**\n1. Chẩn đoán bệnh lý\n2. Phân tích diện tích & Cấp bệnh\n3. Tra cứu dữ liệu")
 
 if uploaded_file is not None:
+    # Fix: Áp dụng ImageOps để xoay ảnh đúng chiều EXIF từ điện thoại
     image_pil = Image.open(uploaded_file)
     image_pil = ImageOps.exif_transpose(image_pil)
     image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
@@ -128,10 +130,7 @@ tab1, tab2, tab3 = st.tabs(["🔍 Chẩn Đoán Bệnh", "📊 Phân Tích Cấp
 # TAB 1: CHẨN ĐOÁN BỆNH
 # ---------------------------------------------------------
 with tab1:
-    st.write("") # Dòng trống đệm
-    if image_cv is None:
-        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
-    else:
+    if image_cv is not None:
         if st.button("🚀 Chẩn đoán", type="primary", use_container_width=True, key="btn_class"):
             if model_chuandoan is not None:
                 with st.spinner("Đang chẩn đoán..."):
@@ -143,10 +142,12 @@ with tab1:
                         with c1:
                             st.image(image_pil, caption="Ảnh gốc đầu vào", use_container_width=True)
                         with c2:
+                            # Fix: Cho phép hiển thị khung bounding box để xác định vị trí nấm bệnh
                             res_plotted = res.plot(conf=True, line_width=2)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="AI Nhận diện", use_container_width=True)
                             
                         with c3:
+                            # Fix: Trích xuất loại bệnh dựa trên bounding box có độ tin cậy cao nhất thay vì ngẫu nhiên
                             conf_values = res.boxes.conf.cpu().numpy()
                             best_idx = np.argmax(conf_values)
                             
@@ -161,6 +162,8 @@ with tab1:
                             info = DISEASE_INFO[info_key]
                             
                             st.markdown(f"### Kết quả: {info['name']}")
+                            
+                            # Đổi dấu chấm thành dấu phẩy và thêm CSS in đậm chữ đỏ
                             conf_display = f"{conf:.1f}".replace('.', ',')
                             st.markdown(f"<div style='color: red; font-weight: bold; font-size: 1.1rem; margin-bottom: 12px;'>Độ tin cậy: {conf_display}%</div>", unsafe_allow_html=True)
                             
@@ -179,21 +182,21 @@ with tab1:
                                 """, unsafe_allow_html=True)
                     else:
                         st.warning("Mô hình không nhận diện được dấu hiệu bệnh lý thực vật (Độ tin cậy > 80%). Có thể lá đang ở trạng thái khỏe mạnh.")
+    else:
+        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để thực hiện Chẩn đoán.")
 
 # ---------------------------------------------------------
 # TAB 2: TÍNH TỶ LỆ VÀ CẤP BỆNH (SEGMENTATION)
 # ---------------------------------------------------------
 with tab2:
-    st.write("") # Dòng trống đệm
-    if image_cv is None:
-        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để phân tích cấp bệnh.")
-    else:
+    if image_cv is not None:
         if st.button("🚀 Phân Tích Mức Độ Bị Hại", type="primary", use_container_width=True, key="btn_seg"):
             if model_capbenh is not None:
                 with st.spinner("AI đang phân tích diện tích vùng tổn thương..."):
                     results = model_capbenh.predict(image_cv, conf=0.8)
                     res = results[0]
                     
+                    # Fix: Thêm kiểm tra an toàn đảm bảo masks tồn tại (hasattr) để chống crash
                     if len(res.boxes) > 0 and hasattr(res, 'masks') and res.masks is not None:
                         c1, c2, c3 = st.columns([1, 1, 1.2])
                         with c1:
@@ -218,14 +221,12 @@ with tab2:
                             
                             leaf_pixels = int(np.sum(total_leaf_mask))
                             disease_pixels = int(np.sum(disease_mask))
-                            
+                                
                             st.markdown("### Kết Quả Đo Lường")
-                            st.markdown(f"""
-                            <div style='margin-bottom: 10px; font-size: 0.9rem; color: #64748b;'>
-                                📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}<br>
-                                📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}
-                            </div>
-                            """, unsafe_allow_html=True)
+                            st.markdown("<div style='margin-bottom: 10px;'>", unsafe_allow_html=True)
+                            st.caption(f"📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}")
+                            st.caption(f"📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}")
+                            st.markdown("</div>", unsafe_allow_html=True)
                             
                             if leaf_pixels > 0:
                                 infected_percentage = (disease_pixels / leaf_pixels) * 100
@@ -233,8 +234,10 @@ with tab2:
                             else:
                                 infected_percentage = 0.0
                             
+                            # Định dạng hiển thị dấu thập phân dạng dấu phẩy theo chuẩn Việt Nam
                             display_percentage = f"{infected_percentage:.2f}".replace('.', ',')
                             
+                            # Hiển thị khối Metric duy nhất: Mức độ bị hại
                             st.markdown(f"""
                             <div>
                                 <div class='metric-label'>Mức độ bị hại</div>
@@ -256,19 +259,21 @@ with tab2:
                                 st.success("✅ **Kết luận: Không phát hiện vết bệnh (Cấp 0)**")
                     else:
                         st.warning("Hệ thống chưa trích xuất được vùng tổn thương (Mask) trên lá.")
+    else:
+        st.info("👈 Vui lòng tải ảnh lên ở thanh bên trái để phân tích cấp bệnh.")
 
 # ---------------------------------------------------------
 # TAB 3: TỪ ĐIỂN TRA CỨU
 # ---------------------------------------------------------
 with tab3:
-    st.write("") # Dòng trống đệm
     st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
     
+    # ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên trong danh sách dropdown
     disease_options = {
-        "Đốm đen": "Dom_den",               
-        "Cháy lá sinh lý": "Chay_la_sinh_ly", 
-        "Cháy lá (Vi khuẩn)": "Chay_la",    
-        "Đốm nâu": "Dom_nau"                
+        "Đốm đen": "Dom_den",
+        "Cháy lá sinh lý": "Chay_la_sinh_ly",
+        "Cháy lá (Vi khuẩn)": "Chay_la",
+        "Đốm nâu": "Dom_nau"
     }
     
     selected_disease_name = st.selectbox("Chọn loại bệnh để tra cứu chi tiết:", list(disease_options.keys()))
