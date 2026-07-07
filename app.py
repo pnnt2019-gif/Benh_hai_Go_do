@@ -55,7 +55,7 @@ model_chuandoan, model_capbenh = load_models()
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
-# ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên
+# ĐÃ CHỈNH SỬA: Loại bỏ chữ "Bệnh" ở các mục name
 DISEASE_INFO = {
     "Dom_den": {
         "name": "Đốm đen",
@@ -223,10 +223,14 @@ with tab2:
                             disease_pixels = int(np.sum(disease_mask))
                                 
                             st.markdown("### Kết Quả Đo Lường")
-                            st.markdown("<div style='margin-bottom: 10px;'>", unsafe_allow_html=True)
-                            st.caption(f"📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}")
-                            st.caption(f"📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}")
-                            st.markdown("</div>", unsafe_allow_html=True)
+                            
+                            # ĐÃ CHỈNH SỬA: Gộp chung thành 1 block HTML để tránh vỡ Tab
+                            st.markdown(f"""
+                            <div style='margin-bottom: 10px; font-size: 0.9rem; color: #64748b;'>
+                                📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}<br>
+                                📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}
+                            </div>
+                            """, unsafe_allow_html=True)
                             
                             if leaf_pixels > 0:
                                 infected_percentage = (disease_pixels / leaf_pixels) * 100
@@ -268,7 +272,7 @@ with tab2:
 with tab3:
     st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
     
-    # ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên trong danh sách dropdown
+    # ĐÃ CHỈNH SỬA: Bỏ chữ "Bệnh" ở danh sách chọn
     disease_options = {
         "Đốm đen": "Dom_den",
         "Cháy lá sinh lý": "Chay_la_sinh_ly",
