@@ -55,10 +55,10 @@ model_chuandoan, model_capbenh = load_models()
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
-# ĐÃ CHỈNH SỬA: Loại bỏ chữ "Bệnh" ở các mục name
+# ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên
 DISEASE_INFO = {
     "Dom_den": {
-        "name": "Đốm đen",
+        "name": "Bệnh đốm đen",
         "scientific": "Stemphylium sp.",
         "order": "Pleosporales",
         "family": "Pleosporaceae",
@@ -78,7 +78,7 @@ DISEASE_INFO = {
         "image": "chay_la_sinh_ly.jpg"
     },
     "Chay_la": {
-        "name": "Cháy lá",
+        "name": "Bệnh cháy lá",
         "scientific": "Xylella fastidiosa",
         "order": "Lysobacterales",
         "family": "Xanthomonadaceae",
@@ -88,7 +88,7 @@ DISEASE_INFO = {
         "image": "chay_la.jpg"
     },
     "Dom_nau": {
-        "name": "Đốm nâu",
+        "name": "Bệnh đốm nâu",
         "scientific": "Cercospora spp.",
         "order": "Mycosphaerellales",
         "family": "Mycosphaerellaceae",
@@ -223,14 +223,10 @@ with tab2:
                             disease_pixels = int(np.sum(disease_mask))
                                 
                             st.markdown("### Kết Quả Đo Lường")
-                            
-                            # ĐÃ CHỈNH SỬA: Gộp chung thành 1 block HTML để tránh vỡ Tab
-                            st.markdown(f"""
-                            <div style='margin-bottom: 10px; font-size: 0.9rem; color: #64748b;'>
-                                📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}<br>
-                                📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}
-                            </div>
-                            """, unsafe_allow_html=True)
+                            st.markdown("<div style='margin-bottom: 10px;'>", unsafe_allow_html=True)
+                            st.caption(f"📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}")
+                            st.caption(f"📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}")
+                            st.markdown("</div>", unsafe_allow_html=True)
                             
                             if leaf_pixels > 0:
                                 infected_percentage = (disease_pixels / leaf_pixels) * 100
@@ -272,12 +268,12 @@ with tab2:
 with tab3:
     st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
     
-    # ĐÃ CHỈNH SỬA: Bỏ chữ "Bệnh" ở danh sách chọn
+    # ĐÃ CHỈNH SỬA: Viết thường các chữ cái sau từ đầu tiên trong danh sách dropdown
     disease_options = {
-        "Đốm đen": "Dom_den",
+        "Bệnh đốm đen": "Dom_den",
         "Cháy lá sinh lý": "Chay_la_sinh_ly",
-        "Cháy lá (Vi khuẩn)": "Chay_la",
-        "Đốm nâu": "Dom_nau"
+        "Bệnh cháy lá (Vi khuẩn)": "Chay_la",
+        "Bệnh đốm nâu": "Dom_nau"
     }
     
     selected_disease_name = st.selectbox("Chọn loại bệnh để tra cứu chi tiết:", list(disease_options.keys()))
