@@ -55,10 +55,9 @@ model_chuandoan, model_capbenh = load_models()
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
-# ĐÃ CHỈNH SỬA: Xóa chữ "Bệnh" ở phần "name" của các đối tượng
 DISEASE_INFO = {
     "Dom_den": {
-        "name": "Đốm đen", # Đã sửa từ "Bệnh đốm đen"
+        "name": "Đốm đen",
         "scientific": "Stemphylium sp.",
         "order": "Pleosporales",
         "family": "Pleosporaceae",
@@ -78,7 +77,7 @@ DISEASE_INFO = {
         "image": "chay_la_sinh_ly.jpg"
     },
     "Chay_la": {
-        "name": "Cháy lá", # Đã sửa từ "Bệnh cháy lá"
+        "name": "Cháy lá",
         "scientific": "Xylella fastidiosa",
         "order": "Lysobacterales",
         "family": "Xanthomonadaceae",
@@ -88,7 +87,7 @@ DISEASE_INFO = {
         "image": "chay_la.jpg"
     },
     "Dom_nau": {
-        "name": "Đốm nâu", # Đã sửa từ "Bệnh đốm nâu"
+        "name": "Đốm nâu",
         "scientific": "Cercospora spp.",
         "order": "Mycosphaerellales",
         "family": "Mycosphaerellaceae",
@@ -116,7 +115,6 @@ with st.sidebar:
     st.markdown("**Chức năng hệ thống:**\n1. Chẩn đoán bệnh lý\n2. Phân tích diện tích & Cấp bệnh\n3. Tra cứu dữ liệu")
 
 if uploaded_file is not None:
-    # Fix: Áp dụng ImageOps để xoay ảnh đúng chiều EXIF từ điện thoại
     image_pil = Image.open(uploaded_file)
     image_pil = ImageOps.exif_transpose(image_pil)
     image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
@@ -142,12 +140,10 @@ with tab1:
                         with c1:
                             st.image(image_pil, caption="Ảnh gốc đầu vào", use_container_width=True)
                         with c2:
-                            # Fix: Cho phép hiển thị khung bounding box để xác định vị trí nấm bệnh
                             res_plotted = res.plot(conf=True, line_width=2)
                             st.image(cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB), caption="AI Nhận diện", use_container_width=True)
                             
                         with c3:
-                            # Fix: Trích xuất loại bệnh dựa trên bounding box có độ tin cậy cao nhất thay vì ngẫu nhiên
                             conf_values = res.boxes.conf.cpu().numpy()
                             best_idx = np.argmax(conf_values)
                             
@@ -162,8 +158,6 @@ with tab1:
                             info = DISEASE_INFO[info_key]
                             
                             st.markdown(f"### Kết quả: {info['name']}")
-                            
-                            # Đổi dấu chấm thành dấu phẩy và thêm CSS in đậm chữ đỏ
                             conf_display = f"{conf:.1f}".replace('.', ',')
                             st.markdown(f"<div style='color: red; font-weight: bold; font-size: 1.1rem; margin-bottom: 12px;'>Độ tin cậy: {conf_display}%</div>", unsafe_allow_html=True)
                             
@@ -196,7 +190,6 @@ with tab2:
                     results = model_capbenh.predict(image_cv, conf=0.8)
                     res = results[0]
                     
-                    # Fix: Thêm kiểm tra an toàn đảm bảo masks tồn tại (hasattr) để chống crash
                     if len(res.boxes) > 0 and hasattr(res, 'masks') and res.masks is not None:
                         c1, c2, c3 = st.columns([1, 1, 1.2])
                         with c1:
@@ -221,12 +214,15 @@ with tab2:
                             
                             leaf_pixels = int(np.sum(total_leaf_mask))
                             disease_pixels = int(np.sum(disease_mask))
-                                
+                            
+                            # ĐÃ SỬA: Gộp chung thành 1 đoạn HTML duy nhất để không làm vỡ DOM
                             st.markdown("### Kết Quả Đo Lường")
-                            st.markdown("<div style='margin-bottom: 10px;'>", unsafe_allow_html=True)
-                            st.caption(f"📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}")
-                            st.caption(f"📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}")
-                            st.markdown("</div>", unsafe_allow_html=True)
+                            st.markdown(f"""
+                            <div style='margin-bottom: 10px; font-size: 0.9rem; color: #64748b;'>
+                                📏 Tổng Pixel Lá thực tế: {leaf_pixels:,}<br>
+                                📏 Tổng Pixel Vết Bệnh: {disease_pixels:,}
+                            </div>
+                            """, unsafe_allow_html=True)
                             
                             if leaf_pixels > 0:
                                 infected_percentage = (disease_pixels / leaf_pixels) * 100
@@ -234,10 +230,8 @@ with tab2:
                             else:
                                 infected_percentage = 0.0
                             
-                            # Định dạng hiển thị dấu thập phân dạng dấu phẩy theo chuẩn Việt Nam
                             display_percentage = f"{infected_percentage:.2f}".replace('.', ',')
                             
-                            # Hiển thị khối Metric duy nhất: Mức độ bị hại
                             st.markdown(f"""
                             <div>
                                 <div class='metric-label'>Mức độ bị hại</div>
@@ -268,12 +262,11 @@ with tab2:
 with tab3:
     st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
     
-    # ĐÃ CHỈNH SỬA: Xóa chữ "Bệnh" ở các khóa hiển thị trong dropdown
     disease_options = {
-        "Đốm đen": "Dom_den",               # Đã sửa từ "Bệnh đốm đen"
-        "Cháy lá sinh lý": "Chay_la_sinh_ly", # Giữ nguyên vì không có chữ Bệnh
-        "Cháy lá (Vi khuẩn)": "Chay_la",    # Đã sửa từ "Bệnh cháy lá (Vi khuẩn)"
-        "Đốm nâu": "Dom_nau"                # Đã sửa từ "Bệnh đốm nâu"
+        "Đốm đen": "Dom_den",               
+        "Cháy lá sinh lý": "Chay_la_sinh_ly", 
+        "Cháy lá (Vi khuẩn)": "Chay_la",    
+        "Đốm nâu": "Dom_nau"                
     }
     
     selected_disease_name = st.selectbox("Chọn loại bệnh để tra cứu chi tiết:", list(disease_options.keys()))
