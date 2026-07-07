@@ -55,10 +55,10 @@ model_chuandoan, model_capbenh = load_models()
 # ==========================================
 # 3. DỮ LIỆU TỪ ĐIỂN BỆNH HẠI LÂM SINH
 # ==========================================
-# ĐÃ CHỈNH SỬA: Bỏ chữ "Bệnh" ở đầu, viết hoa chữ cái đầu tên bệnh
+# ĐÃ CHỈNH SỬA: Xóa chữ "Bệnh" ở phần "name" của các đối tượng
 DISEASE_INFO = {
     "Dom_den": {
-        "name": "Đốm đen",
+        "name": "Đốm đen", # Đã sửa từ "Bệnh đốm đen"
         "scientific": "Stemphylium sp.",
         "order": "Pleosporales",
         "family": "Pleosporaceae",
@@ -78,7 +78,7 @@ DISEASE_INFO = {
         "image": "chay_la_sinh_ly.jpg"
     },
     "Chay_la": {
-        "name": "Cháy lá",
+        "name": "Cháy lá", # Đã sửa từ "Bệnh cháy lá"
         "scientific": "Xylella fastidiosa",
         "order": "Lysobacterales",
         "family": "Xanthomonadaceae",
@@ -88,7 +88,7 @@ DISEASE_INFO = {
         "image": "chay_la.jpg"
     },
     "Dom_nau": {
-        "name": "Đốm nâu",
+        "name": "Đốm nâu", # Đã sửa từ "Bệnh đốm nâu"
         "scientific": "Cercospora spp.",
         "order": "Mycosphaerellales",
         "family": "Mycosphaerellaceae",
@@ -268,12 +268,12 @@ with tab2:
 with tab3:
     st.markdown("### 📖 Cơ Sở Dữ Liệu Bệnh Hại Gõ Đỏ")
     
-    # ĐÃ CHỈNH SỬA: Bỏ chữ "Bệnh" ở đầu, viết hoa chữ cái đầu tên bệnh trong danh sách dropdown
+    # ĐÃ CHỈNH SỬA: Xóa chữ "Bệnh" ở các khóa hiển thị trong dropdown
     disease_options = {
-        "Đốm đen": "Dom_den",
-        "Cháy lá sinh lý": "Chay_la_sinh_ly",
-        "Cháy lá (Vi khuẩn)": "Chay_la",
-        "Đốm nâu": "Dom_nau"
+        "Đốm đen": "Dom_den",               # Đã sửa từ "Bệnh đốm đen"
+        "Cháy lá sinh lý": "Chay_la_sinh_ly", # Giữ nguyên vì không có chữ Bệnh
+        "Cháy lá (Vi khuẩn)": "Chay_la",    # Đã sửa từ "Bệnh cháy lá (Vi khuẩn)"
+        "Đốm nâu": "Dom_nau"                # Đã sửa từ "Bệnh đốm nâu"
     }
     
     selected_disease_name = st.selectbox("Chọn loại bệnh để tra cứu chi tiết:", list(disease_options.keys()))
